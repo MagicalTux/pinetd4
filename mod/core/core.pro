@@ -2,11 +2,12 @@ TEMPLATE = lib
 CONFIG += shared
 TARGET = ../core
 DEPENDPATH += .
-INCLUDEPATH += .
+INCLUDEPATH += . ../../include
 DEFINES += PINETD_CORE_LIBRARY
 
 # allows qt to not create a bunch of useless symlinks
 CONFIG += plugin
 
 # Input
-SOURCES += main.cpp
+SOURCES += main.cpp Core.cpp
+HEADERS += ../../include/mod/core/Core.hpp
