@@ -11,6 +11,7 @@ public:
 
 public slots:
 	virtual void incomingTcp(const QString &entry, QTcpSocket *sock);
+	virtual void clientLost(QObject *);
 
 protected:
 	void clientAdd(Client *);

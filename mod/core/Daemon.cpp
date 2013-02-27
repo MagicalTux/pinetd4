@@ -14,6 +14,14 @@ void Daemon::incomingTcp(const QString &, QTcpSocket *sock) {
 }
 
 void Daemon::clientAdd(Client *client) {
+	connect(client, SIGNAL(destroyed(QObject*)), this, SLOT(clientLost(QObject*)));
 	clients.insert(client->getId(), client);
+}
+
+void Daemon::clientLost(QObject *obj) {
+	Client *c = (Client*)obj;
+	QString id = c->getId();
+	qDebug("Daemon: lost client id %s", qPrintable(id));
+	clients.remove(id);
 }
 
