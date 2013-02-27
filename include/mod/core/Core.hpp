@@ -4,6 +4,7 @@
 #include <QLibrary>
 
 class Daemon;
+class CoreTcp;
 
 class Core: public QObject {
 	Q_OBJECT;
@@ -18,5 +19,6 @@ private:
 	QSettings settings;
 	QMap<QString,Daemon*> daemons;
 	QMap<QString,QLibrary*> modules;
+	QMap<QString,CoreTcp*> port_tcp;
 };
 

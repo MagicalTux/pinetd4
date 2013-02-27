@@ -1,4 +1,5 @@
 #include <mod/core/Core.hpp>
+#include <mod/core/CoreTcp.hpp>
 #include <mod/core/Daemon.hpp>
 #include <QStringList>
 #include <QSet>
@@ -49,6 +50,40 @@ void Core::reloadConfig() {
 		// we may want to set a signal on d
 		d->deleteLater();
 	}
+
+	settings.endGroup();
+
+	settings.beginGroup("tcp");
+	k = settings.allKeys();
+
+	QSet<QString> cur_tcp;
+	// iterate on currently routed tcp ports
+	for(auto i = port_tcp.constBegin(); i != port_tcp.constEnd(); i++)
+		cur_tcp.insert(i.key());
+
+	for(int i = 0; i < k.size(); i++) {
+		if (port_tcp.contains(k.at(i))) {
+			// already linked to somewhere, remove and re-add with new value
+			port_tcp.value(k.at(i))->setTarget(settings.value(k.at(i)).toString());
+			cur_tcp.remove(k.at(i));
+			continue;
+		}
+		CoreTcp *t = new CoreTcp(this);
+		t->setTarget(settings.value(k.at(i)).toString());
+		QStringList nfo = k.at(i).split(':');
+		if (nfo.size() != 2) {
+			qDebug("Failed to listen on %s, bad syntax", qPrintable(k.at(i)));
+			continue;
+		}
+		if (!t->listen(QHostAddress(nfo.at(0)), nfo.at(1).toInt())) {
+			qDebug("Failed to listen on %s, giving up", qPrintable(k.at(i)));
+			continue;
+		}
+		port_tcp.insert(k.at(i), t);
+	}
+
+	for(auto i = cur_tcp.constBegin(); i != cur_tcp.constEnd(); i++)
+		port_tcp.take(*i)->deleteLater();
 
 	settings.endGroup();
 }
