@@ -1,2 +1,2 @@
 TEMPLATE = subdirs
-SUBDIRS = echo
+SUBDIRS = echo chargen
