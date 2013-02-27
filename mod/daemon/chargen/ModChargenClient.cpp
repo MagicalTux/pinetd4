@@ -2,6 +2,9 @@
 #include "ModChargen.hpp"
 #include <QTcpSocket>
 
+// for details on generation, see
+// http://tools.ietf.org/html/rfc864
+
 ModChargenClient::ModChargenClient(QTcpSocket *sock, ModChargen *parent): ClientTcp(sock, parent) {
 	qDebug("Chargen: new client id %s", qPrintable(getId()));
 	pos = 1;
@@ -11,11 +14,13 @@ ModChargenClient::ModChargenClient(QTcpSocket *sock, ModChargen *parent): Client
 }
 
 void ModChargenClient::nextLine() {
-	QByteArray buf(73,'\0');
+	QByteArray buf(74,'\0');
 	for(int i = 0; i < 72; i++) {
 		buf[i] = 32+((i+pos)%95);
 	}
-	buf[73] = '\n';
+	// add CR LF
+	buf[73] = '\r';
+	buf[74] = '\n';
 	pos = (pos + 1) % 95;
 	sock->write(buf);
 }
