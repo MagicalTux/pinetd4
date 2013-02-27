@@ -4,6 +4,13 @@ Fourth evolution of pInetd, this time written in C++ and based on Qt
 
 http://www.pinetd.com
 
+# Compilation
+
+Compiling is easy.
+
+	qmake
+	make
+
 # History
 
 pInetd is initially a PHP daemon allowing to easily write and run network
