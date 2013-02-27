@@ -7,7 +7,11 @@ class ClientTcp: public Client {
 public:
 	ClientTcp(QTcpSocket *sock, Daemon *parent);
 
+public slots:
+	void doRead();
+
 protected:
 	QTcpSocket *sock;
+	virtual void handleBuffer(const QByteArray&) = 0;
 };
 
