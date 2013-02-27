@@ -26,7 +26,7 @@ run the daemons, but it failed.
 This new evolution aims at solving the previous problems by adopting a fully
 modular infrastructure (TODO: insert more bullshit here).
 
-# Major differences from pinetd2
+## Major differences compared to pinetd2
 
 First major difference is that the system is now written in C++ and not in
 PHP.
