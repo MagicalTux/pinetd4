@@ -105,3 +105,8 @@ bool Core::modprobe(const QString &name) {
 	return true;
 }
 
+Daemon *Core::getDaemon(const QString &key) {
+	if (!daemons.contains(key)) return NULL;
+	return daemons.value(key);
+}
+

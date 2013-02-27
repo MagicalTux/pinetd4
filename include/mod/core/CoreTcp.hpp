@@ -8,8 +8,12 @@ public:
 	CoreTcp(Core *parent);
 	void setTarget(const QString &);
 
+protected:
+	virtual void incomingConnection(int socketDescriptor);
+
 private:
 	Core *parent;
 	QString target;
+	QString entry;
 };
 

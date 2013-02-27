@@ -10,6 +10,7 @@ class Core: public QObject {
 	Q_OBJECT;
 public:
 	Core();
+	Daemon *getDaemon(const QString &);
 
 public slots:
 	void reloadConfig();
