@@ -7,5 +7,8 @@ TARGET = ../pinetd
 DEPENDPATH += .
 INCLUDEPATH += .
 
+QT -= gui
+QT += network
+
 # Input
 SOURCES += cli.cpp

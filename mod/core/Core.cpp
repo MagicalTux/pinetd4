@@ -54,6 +54,7 @@ bool Core::modprobe(const QString &name) {
 	qDebug("Core: loading module %s", qPrintable(name));
 
 	QLibrary *lib = new QLibrary(QString("mod/")+name, this);
+	lib->setLoadHints(QLibrary::ResolveAllSymbolsHint);
 	if (!lib->load()) {
 		qDebug("Core: failed to load module: %s", qPrintable(lib->errorString()));
 		delete lib;

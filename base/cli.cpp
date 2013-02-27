@@ -7,7 +7,7 @@ int main(int argc, char *argv[]) {
 	QLibrary lib("mod/core");
 	lib.setLoadHints(QLibrary::ResolveAllSymbolsHint | QLibrary::ExportExternalSymbolsHint);
 	if (!lib.load()) {
-		qDebug("Failed to load core module, giving up");
+		qDebug("Failed to load core module: %s", qPrintable(lib.errorString()));
 		return 1;
 	}
 	void (*ptr)() = (void(*)())lib.resolve("pinetd_main");
