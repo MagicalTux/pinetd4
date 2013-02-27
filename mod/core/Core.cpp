@@ -1,4 +1,5 @@
 #include <mod/core/Core.hpp>
+#include <mod/core/Daemon.hpp>
 #include <QStringList>
 #include <QSet>
 
@@ -43,7 +44,11 @@ void Core::reloadConfig() {
 		daemons.insert(k.at(i), d);
 	}
 
-	// TODO: delete daemons that are still in cur_daemons (ie. were loaded before, but shouldn't anymore)
+	for(auto i = cur_daemons.constBegin(); i != cur_daemons.constEnd(); i++) {
+		Daemon *d = daemons.take(*i);
+		// we may want to set a signal on d
+		d->deleteLater();
+	}
 
 	settings.endGroup();
 }
