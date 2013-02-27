@@ -19,3 +19,22 @@ run the daemons, but it failed.
 This new evolution aims at solving the previous problems by adopting a fully
 modular infrastructure (TODO: insert more bullshit here).
 
+# Major differences from pinetd2
+
+First major difference is that the system is now written in C++ and not in
+PHP.
+
+The second main difference is that we do not have multiple processes anymore.
+Qt's [FSM][fsm] is based on the concept that most actions shouldn't be
+blocking, and long work should be run in a QThread (that will send an event on
+completion).
+
+Now, the Core class also handles listening on TCP ports. Each time a new
+connection happens, the connection is passed to the class currently in charge.
+This potentially also allows running multiple threads per group of connections
+and makes it possible for the core class to do things (for example enable SSL)
+on connections before passing them over.
+
+
+[fsm]: http://en.wikipedia.org/wiki/Finite-state_machine "Finite-state machine on Wikpiedia"
+
