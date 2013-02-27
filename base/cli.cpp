@@ -5,6 +5,7 @@ int main(int argc, char *argv[]) {
 	QCoreApplication app(argc, argv);
 
 	QLibrary lib("mod/core");
+	lib.setLoadHints(QLibrary::ResolveAllSymbolsHint | QLibrary::ExportExternalSymbolsHint);
 	if (!lib.load()) {
 		qDebug("Failed to load core module, giving up");
 		return 1;
