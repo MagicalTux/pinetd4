@@ -1,2 +1,2 @@
 TEMPLATE = subdirs
-SUBDIRS = core daemon
+SUBDIRS = core ext daemon

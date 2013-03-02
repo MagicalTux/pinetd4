@@ -3,7 +3,11 @@
 class ClientTcpLine: public ClientTcp {
 	Q_OBJECT;
 public:
-	ClientTcpLine();
+	ClientTcpLine(QTcpSocket *sock, Daemon *parent);
 	// TODO
+
+protected:
+	virtual void handleBuffer(const QByteArray&); // read buffer, parse it
+	QByteArray read_buffer;
 };
 
