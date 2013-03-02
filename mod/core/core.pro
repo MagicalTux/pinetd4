@@ -15,6 +15,6 @@ QMAKE_CXXFLAGS += -std=gnu++0x
 
 # Input
 SOURCES += main.cpp Core.cpp CoreTcp.cpp Daemon.cpp Client.cpp ClientTcp.cpp
-HEADERS += ../../include/mod/core/Core.hpp ../../include/mod/core/CoreTcp.hpp
-HEADERS += ../../include/mod/core/Daemon.hpp
-HEADERS += ../../include/mod/core/Client.hpp ../../include/mod/core/ClientTcp.hpp
+HEADERS += ../../include/core/Core.hpp ../../include/core/CoreTcp.hpp
+HEADERS += ../../include/core/Daemon.hpp
+HEADERS += ../../include/core/Client.hpp ../../include/core/ClientTcp.hpp
