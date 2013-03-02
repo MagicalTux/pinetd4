@@ -1,4 +1,4 @@
-#include <mod/core/ClientTcp.hpp>
+#include <core/ClientTcp.hpp>
 
 class ClientTcpLine: public ClientTcp {
 	Q_OBJECT;

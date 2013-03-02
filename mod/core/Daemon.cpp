@@ -1,5 +1,5 @@
-#include <mod/core/Daemon.hpp>
-#include <mod/core/Client.hpp>
+#include <core/Daemon.hpp>
+#include <core/Client.hpp>
 #include <QTcpSocket>
 
 Daemon::Daemon(const QString &_modname, const QString &_instname) {

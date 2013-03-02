@@ -1,5 +1,5 @@
-#include <mod/core/Client.hpp>
-#include <mod/core/Daemon.hpp>
+#include <core/Client.hpp>
+#include <core/Daemon.hpp>
 #include <QUuid>
 
 Client::Client(Daemon *_parent): QObject(_parent) {

@@ -1,5 +1,5 @@
 #include <QtCore/QtGlobal>
-#include <mod/core/Core.hpp>
+#include <core/Core.hpp>
 
 extern "C" {
 	Q_DECL_EXPORT void pinetd_main();

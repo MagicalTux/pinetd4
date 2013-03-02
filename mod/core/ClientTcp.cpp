@@ -1,4 +1,4 @@
-#include <mod/core/ClientTcp.hpp>
+#include <core/ClientTcp.hpp>
 #include <QTcpSocket>
 
 ClientTcp::ClientTcp(QTcpSocket *_sock, Daemon *_parent): Client(_parent) {

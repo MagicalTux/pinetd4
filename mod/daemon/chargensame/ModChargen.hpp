@@ -1,4 +1,4 @@
-#include <mod/core/Daemon.hpp>
+#include <core/Daemon.hpp>
 #include <QTimer>
 
 class ModChargen: public Daemon {

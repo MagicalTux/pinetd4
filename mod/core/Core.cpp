@@ -1,6 +1,6 @@
-#include <mod/core/Core.hpp>
-#include <mod/core/CoreTcp.hpp>
-#include <mod/core/Daemon.hpp>
+#include <core/Core.hpp>
+#include <core/CoreTcp.hpp>
+#include <core/Daemon.hpp>
 #include <QStringList>
 #include <QSet>
 

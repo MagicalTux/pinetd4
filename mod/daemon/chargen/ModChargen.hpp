@@ -1,4 +1,4 @@
-#include <mod/core/Daemon.hpp>
+#include <core/Daemon.hpp>
 
 class ModChargen: public Daemon {
 	Q_OBJECT;
