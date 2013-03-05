@@ -3,10 +3,44 @@
 #include <core/Daemon.hpp>
 #include <QStringList>
 #include <QSet>
+#include <QFile>
+#include <QRegExp>
 
 Core::Core(): settings("pinetd.ini", QSettings::IniFormat) {
 	qDebug("Core: in constructor");
+	reloadSymbols();
 	reloadConfig();
+}
+
+void Core::reloadSymbols() {
+	qDebug("Core: reloading symbols table");
+
+	sym_map.clear();
+
+	QStringList sym;
+	sym << "mod/ext/symbols.txt";
+
+	for(int i = 0; i < sym.size(); i++) {
+		// read file
+		QFile f(sym.at(i));
+		if (!f.exists()) {
+			qDebug("Core: file not found: %s", qPrintable(sym.at(i)));
+			continue;
+		}
+		if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+			qDebug("Core: could not open file %s for reading", qPrintable(sym.at(i)));
+			continue;
+		}
+		while(1) {
+			QByteArray line = f.readLine();
+			if (line.isEmpty()) break;
+			QStringList dat = QString::fromLatin1(line.trimmed()).split(' ');
+			QString mod = dat.takeFirst();
+			QString sym = dat.takeFirst();
+			sym_map.insert(sym, mod);
+		}
+		f.close();
+	}
 }
 
 void Core::reloadConfig() {
@@ -94,11 +128,38 @@ bool Core::modprobe(const QString &name) {
 	qDebug("Core: loading module %s", qPrintable(name));
 
 	QLibrary *lib = new QLibrary(QString("mod/")+name, this);
-	lib->setLoadHints(QLibrary::ResolveAllSymbolsHint);
-	if (!lib->load()) {
-		qDebug("Core: failed to load module: %s", qPrintable(lib->errorString()));
-		delete lib;
-		return false;
+
+	if (name.left(4) == "ext/") {
+		// if an extension, export symbols to other modules
+		lib->setLoadHints(QLibrary::ResolveAllSymbolsHint | QLibrary::ExportExternalSymbolsHint);
+	} else {
+		lib->setLoadHints(QLibrary::ResolveAllSymbolsHint);
+	}
+
+	while(1) {
+		if (!lib->load()) {
+			QString err = lib->errorString();
+			// Cannot load library mod/daemon/broadcast: (mod/daemon/libbroadcast.so: undefined symbol: _ZTI13ClientTcpLine)
+			QRegExp rx(".*: \\(.*: undefined symbol: (_Z.*)\\)");
+			if (rx.exactMatch(err)) {
+				QString sym = rx.cap(1);
+				if (sym_map.contains(sym)) {
+					QString mod = sym_map.value(sym);
+					if (!modules.contains(mod)) {
+						qDebug("Core: missing symbol: %s - loading %s", qPrintable(sym), qPrintable(mod));
+						if (modprobe(mod)) {
+							// need to call "unload" so it'll try again
+							lib->unload();
+							continue;
+						}
+					}
+				}
+			}
+			qDebug("Core: failed to load module: %s", qPrintable(err));
+			delete lib;
+			return false;
+		}
+		break;
 	}
 
 	modules.insert(name, lib);

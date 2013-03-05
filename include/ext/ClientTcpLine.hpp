@@ -7,6 +7,7 @@ public:
 	// TODO
 
 protected:
+	virtual void handleLine(const QByteArray&) = 0; // handle one line of input
 	virtual void handleBuffer(const QByteArray&); // read buffer, parse it
 	QByteArray read_buffer;
 };

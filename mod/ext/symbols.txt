@@ -1,16 +1,19 @@
-libtcpline.so _ZL26qt_meta_data_ClientTcpLine qt_meta_data_ClientTcpLine
-libtcpline.so _ZL32qt_meta_stringdata_ClientTcpLine qt_meta_stringdata_ClientTcpLine
-libtcpline.so _ZN13ClientTcpLine11qt_metacallEN11QMetaObject4CallEiPPv ClientTcpLine::qt_metacall(QMetaObject::Call, int, void**)
-libtcpline.so _ZN13ClientTcpLine11qt_metacastEPKc ClientTcpLine::qt_metacast(char const*)
-libtcpline.so _ZN13ClientTcpLine16staticMetaObjectE ClientTcpLine::staticMetaObject
-libtcpline.so _ZN13ClientTcpLine18qt_static_metacallEP7QObjectN11QMetaObject4CallEiPPv ClientTcpLine::qt_static_metacall(QObject*, QMetaObject::Call, int, void**)
-libtcpline.so _ZN13ClientTcpLine25staticMetaObjectExtraDataE ClientTcpLine::staticMetaObjectExtraData
-libtcpline.so _ZN13ClientTcpLineC1EP10QTcpSocketP6Daemon ClientTcpLine::ClientTcpLine(QTcpSocket*, Daemon*)
-libtcpline.so _ZN13ClientTcpLineC2EP10QTcpSocketP6Daemon ClientTcpLine::ClientTcpLine(QTcpSocket*, Daemon*)
-libtcpline.so _ZN13ClientTcpLineD0Ev ClientTcpLine::~ClientTcpLine()
-libtcpline.so _ZN13ClientTcpLineD1Ev ClientTcpLine::~ClientTcpLine()
-libtcpline.so _ZN13ClientTcpLineD2Ev ClientTcpLine::~ClientTcpLine()
-libtcpline.so _ZNK13ClientTcpLine10metaObjectEv ClientTcpLine::metaObject() const
-libtcpline.so _ZTI13ClientTcpLine typeinfo for ClientTcpLine
-libtcpline.so _ZTS13ClientTcpLine typeinfo name for ClientTcpLine
-libtcpline.so _ZTV13ClientTcpLine vtable for ClientTcpLine
+ext/tcpline _ZL26qt_meta_data_ClientTcpLine qt_meta_data_ClientTcpLine
+ext/tcpline _ZL32qt_meta_stringdata_ClientTcpLine qt_meta_stringdata_ClientTcpLine
+ext/tcpline _ZN10QByteArrayD1Ev QByteArray::~QByteArray()
+ext/tcpline _ZN10QByteArrayD2Ev QByteArray::~QByteArray()
+ext/tcpline _ZN13ClientTcpLine11qt_metacallEN11QMetaObject4CallEiPPv ClientTcpLine::qt_metacall(QMetaObject::Call, int, void**)
+ext/tcpline _ZN13ClientTcpLine11qt_metacastEPKc ClientTcpLine::qt_metacast(char const*)
+ext/tcpline _ZN13ClientTcpLine12handleBufferERK10QByteArray ClientTcpLine::handleBuffer(QByteArray const&)
+ext/tcpline _ZN13ClientTcpLine16staticMetaObjectE ClientTcpLine::staticMetaObject
+ext/tcpline _ZN13ClientTcpLine18qt_static_metacallEP7QObjectN11QMetaObject4CallEiPPv ClientTcpLine::qt_static_metacall(QObject*, QMetaObject::Call, int, void**)
+ext/tcpline _ZN13ClientTcpLine25staticMetaObjectExtraDataE ClientTcpLine::staticMetaObjectExtraData
+ext/tcpline _ZN13ClientTcpLineC1EP10QTcpSocketP6Daemon ClientTcpLine::ClientTcpLine(QTcpSocket*, Daemon*)
+ext/tcpline _ZN13ClientTcpLineC2EP10QTcpSocketP6Daemon ClientTcpLine::ClientTcpLine(QTcpSocket*, Daemon*)
+ext/tcpline _ZN13ClientTcpLineD0Ev ClientTcpLine::~ClientTcpLine()
+ext/tcpline _ZN13ClientTcpLineD1Ev ClientTcpLine::~ClientTcpLine()
+ext/tcpline _ZN13ClientTcpLineD2Ev ClientTcpLine::~ClientTcpLine()
+ext/tcpline _ZNK13ClientTcpLine10metaObjectEv ClientTcpLine::metaObject() const
+ext/tcpline _ZTI13ClientTcpLine typeinfo for ClientTcpLine
+ext/tcpline _ZTS13ClientTcpLine typeinfo name for ClientTcpLine
+ext/tcpline _ZTV13ClientTcpLine vtable for ClientTcpLine

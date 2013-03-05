@@ -13,6 +13,7 @@ public:
 	Daemon *getDaemon(const QString &);
 
 public slots:
+	void reloadSymbols();
 	void reloadConfig();
 	bool modprobe(const QString &module);
 
@@ -21,5 +22,7 @@ private:
 	QMap<QString,Daemon*> daemons;
 	QMap<QString,QLibrary*> modules;
 	QMap<QString,CoreTcp*> port_tcp;
+
+	QMap<QString,QString> sym_map;
 };
 
