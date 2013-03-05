@@ -146,7 +146,7 @@ bool Core::modprobe(const QString &name) {
 				if (sym_map.contains(sym)) {
 					QString mod = sym_map.value(sym);
 					if (!modules.contains(mod)) {
-						qDebug("Core: missing symbol: %s - loading %s", qPrintable(sym), qPrintable(mod));
+//						qDebug("Core: missing symbol: %s - loading %s", qPrintable(sym), qPrintable(mod));
 						if (modprobe(mod)) {
 							// need to call "unload" so it'll try again
 							lib->unload();
