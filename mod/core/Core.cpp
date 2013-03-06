@@ -5,6 +5,7 @@
 #include <QSet>
 #include <QFile>
 #include <QRegExp>
+#include <QThread>
 
 Core::Core(): settings("pinetd.ini", QSettings::IniFormat) {
 	qDebug("Core: in constructor");
@@ -76,6 +77,9 @@ void Core::reloadConfig() {
 			qDebug("Core: failed to instanciate daemon %s", qPrintable(k.at(i)));
 			continue;
 		}
+		QThread *t = new QThread(d);
+		d->moveToThread(t);
+		t->start();
 		daemons.insert(k.at(i), d);
 	}
 
