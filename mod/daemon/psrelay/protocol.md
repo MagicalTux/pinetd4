@@ -7,7 +7,7 @@ pub/sub relay
 * length (2 bytes, length of data after length, minimum is 17)
 * type (1 byte, 0x00=JSON, other types not defined)
 * channel (16 bytes)
-* <data>
+* data
 
 ## Outgoing packets (to PSRelay)
 
