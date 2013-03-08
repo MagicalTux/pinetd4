@@ -1,15 +1,19 @@
-# PSRelay Protocol
+# PS Protocol
 
-pub/sub relay
+pub/sub provider and relay
 
-## Incoming packets (from PSRelay)
+## Data packets
+
+Those data packets are generated and pushed on the provider socket.
+
+They are then forwarded to relays, or directly to consumers.
 
 * length (2 bytes, length of data after length, minimum is 17)
 * type (1 byte, 0x00=JSON, other types not defined)
 * channel (16 bytes)
 * data
 
-## Outgoing packets (to PSRelay)
+## Subscription packets
 
 ### subscribe (0x81)
 
