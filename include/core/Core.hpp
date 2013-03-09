@@ -22,6 +22,9 @@ private:
 	QMap<QString,Daemon*> daemons;
 	QMap<QString,QLibrary*> modules;
 	QMap<QString,CoreTcp*> port_tcp;
+#ifdef QT_OS_UNIX
+	QMap<QString,CoreUdg*> port_udg;
+#endif
 
 	QMap<QString,QString> sym_map;
 };

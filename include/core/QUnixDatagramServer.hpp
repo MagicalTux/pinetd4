@@ -7,6 +7,7 @@ class QUnixDatagramServer: public QObject {
 public:
 	QUnixDatagramServer(const QString &socket, QObject *parent = 0);
 	~QUnixDatagramServer();
+	bool isValid() const;
 
 public slots:
 	void activated(int sock);
