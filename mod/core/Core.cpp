@@ -6,7 +6,7 @@
 #include <QFile>
 #include <QRegExp>
 #include <QThread>
-#ifdef QT_OS_UNIX
+#ifdef Q_OS_UNIX
 #include <core/CoreUdg.hpp>
 #endif
 
@@ -132,7 +132,7 @@ void Core::reloadConfig() {
 		settings.endGroup();
 	} while(0);
 
-#ifdef QT_OS_UNIX
+#ifdef Q_OS_UNIX
 	do {
 		settings.beginGroup("udg");
 		QStringList k = settings.allKeys();

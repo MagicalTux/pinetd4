@@ -2,9 +2,13 @@
 #include <QSettings>
 #include <QMap>
 #include <QLibrary>
+#include <QtGlobal>
 
 class Daemon;
 class CoreTcp;
+#ifdef Q_OS_UNIX
+class CoreUdg;
+#endif
 
 class Core: public QObject {
 	Q_OBJECT;
@@ -22,7 +26,7 @@ private:
 	QMap<QString,Daemon*> daemons;
 	QMap<QString,QLibrary*> modules;
 	QMap<QString,CoreTcp*> port_tcp;
-#ifdef QT_OS_UNIX
+#ifdef Q_OS_UNIX
 	QMap<QString,CoreUdg*> port_udg;
 #endif
 
