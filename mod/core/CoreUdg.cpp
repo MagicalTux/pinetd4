@@ -33,6 +33,11 @@ void CoreUdg::setTarget(QObject *target, const QString &_entry) {
 	connect(receiver, SIGNAL(destroyed(QObject*)), this, SLOT(targetDestroyed(QObject*)));
 }
 
+void CoreUdg::targetDestroyed(QObject *o) {
+	if (o != receiver) return;
+	setTarget(NULL);
+}
+
 void CoreUdg::message(const QByteArray &msg) {
 	outgoingDatagram(msg);
 }

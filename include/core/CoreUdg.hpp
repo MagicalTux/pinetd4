@@ -15,6 +15,7 @@ signals:
 
 public slots:
 	void message(const QByteArray&);
+	void targetDestroyed(QObject*);
 
 private:
 	Core *parent;
