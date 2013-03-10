@@ -5,7 +5,7 @@
 #include <QtGlobal>
 #include <QMutex>
 
-#define PINETD_VERSION "0.1.0-dev"
+#define PINETD_VERSION "0.1.1-dev"
 
 class Daemon;
 class CoreTcp;
