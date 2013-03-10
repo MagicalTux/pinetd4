@@ -26,7 +26,7 @@ void Daemon::clientAdd(Client *client) {
 void Daemon::clientLost(QObject *obj) {
 	Client *c = (Client*)obj;
 	QString id = c->getId();
-	qDebug("Daemon: lost client id %s", qPrintable(id));
+//	qDebug("Daemon: lost client id %s", qPrintable(id));
 	clients.remove(id);
 }
 

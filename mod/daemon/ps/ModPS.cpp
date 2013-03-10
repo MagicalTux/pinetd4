@@ -17,7 +17,7 @@ void ModPS::reload() {
 	QStringList conf_masters;
 
 	if (conf.contains("master"))
-		conf_masters = conf.value("master").toString().split(",");
+		conf_masters = conf.value("master").toStringList();
 
 	// make list of current masters
 	QSet<QString> cur_masters;
@@ -57,7 +57,6 @@ void ModPS::checkMasters() {
 			if (tmp.size() != 2) break; // can't help it
 			qDebug("ModPS: connecting to master %s", qPrintable(i.key()));
 			i.value()->connectToHost(tmp.at(0), tmp.at(1).toInt());
-			break;
 		}
 	}
 }
