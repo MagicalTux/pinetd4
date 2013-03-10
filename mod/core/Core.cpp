@@ -13,7 +13,7 @@
 static Core *core_v;
 
 Core::Core(): settings("pinetd.ini", QSettings::IniFormat) {
-	qDebug("Core: in constructor");
+	qDebug("Core: Loaded pInetd version %s", qPrintable(version()));
 	core_v = this;
 	reloadSymbols();
 	reloadConfig();
@@ -21,6 +21,10 @@ Core::Core(): settings("pinetd.ini", QSettings::IniFormat) {
 
 Core *Core::get() {
 	return core_v;
+}
+
+QString Core::version() {
+	return PINETD_VERSION;
 }
 
 void Core::reloadSymbols() {

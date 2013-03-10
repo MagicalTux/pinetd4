@@ -5,6 +5,8 @@
 #include <QtGlobal>
 #include <QMutex>
 
+#define PINETD_VERSION "0.1.0-dev"
+
 class Daemon;
 class CoreTcp;
 #ifdef Q_OS_UNIX
@@ -19,6 +21,7 @@ public:
 	QMap<QString,QVariant> getConfig(const QString &daemon);
 
 	static Core *get();
+	QString version();
 
 signals:
 	void reloadDaemons();
