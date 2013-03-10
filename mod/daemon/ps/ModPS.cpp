@@ -9,3 +9,7 @@ void ModPS::incomingTcp(const QString &, QTcpSocket *sock) {
 	clientAdd(new ModPSClient(sock, this));
 }
 
+void ModPS::incomingDatagram(const QByteArray&dat, DatagramReply*) {
+	qDebug("ModPS: got datagram");
+}
+

@@ -9,7 +9,7 @@ Those data packets are generated and pushed on the provider socket.
 They are then forwarded to relays, or directly to consumers.
 
 * length (2 bytes, length of data after length, minimum is 17)
-* type (1 byte, 0x00=JSON, other types not defined)
+* type (1 byte, 0x00=JSON, 0x01=out_of_band_JSON, other types not defined)
 * channel (16 bytes)
 * data
 

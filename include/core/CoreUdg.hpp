@@ -2,6 +2,7 @@
 
 class Core;
 class QUnixDatagramServer;
+class DatagramReply;
 
 class CoreUdg: public QObject {
 	Q_OBJECT;
@@ -11,7 +12,7 @@ public:
 	bool isValid() const;
 
 signals:
-	void outgoingDatagram(const QByteArray&);
+	void outgoingDatagram(const QByteArray&, DatagramReply*);
 
 public slots:
 	void message(const QByteArray&);
