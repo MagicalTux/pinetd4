@@ -106,14 +106,17 @@ void Core::reloadConfig() {
 			cur_tcp.insert(i.key());
 
 		for(int i = 0; i < k.size(); i++) {
+			QStringList tgt = settings.value(k.at(i)).toString().split(":");
+			if (tgt.size() == 1) tgt.append("main");
+
 			if (port_tcp.contains(k.at(i))) {
 				// already linked to somewhere, remove and re-add with new value
-				port_tcp.value(k.at(i))->setTarget(settings.value(k.at(i)).toString());
+				port_tcp.value(k.at(i))->setTarget(getDaemon(tgt.at(0)), tgt.at(1));
 				cur_tcp.remove(k.at(i));
 				continue;
 			}
 			CoreTcp *t = new CoreTcp(this);
-			t->setTarget(settings.value(k.at(i)).toString());
+			t->setTarget(getDaemon(tgt.at(0)), tgt.at(1));
 			QStringList nfo = k.at(i).split(':');
 			if (nfo.size() != 2) {
 				qDebug("Failed to listen on %s, bad syntax", qPrintable(k.at(i)));
