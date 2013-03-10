@@ -140,7 +140,8 @@ void ModPS::incomingTcp(const QString &, QTcpSocket *sock) {
 	clientAdd(t);
 }
 
-void ModPS::incomingDatagram(const QByteArray&dat, DatagramReply*) {
+void ModPS::incomingDatagram(const QByteArray&dat, DatagramReply*r) {
+	if (r != NULL) delete r;
 	pushPacket(dat);
 }
 
