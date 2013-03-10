@@ -1,8 +1,111 @@
 #include "ModPS.hpp"
 #include "ModPSClient.hpp"
+#include <QStringList>
+#include <QVariant>
+#include <QSet>
+#include <QTcpSocket>
 
 ModPS::ModPS(const QString &modname, const QString &instname): Daemon(modname, instname) {
-	qDebug("ModPS: new instance");
+//	qDebug("ModPS: new instance");
+	connect(&masters_check, SIGNAL(timeout()), this, SLOT(checkMasters()));
+	masters_check.setSingleShot(false);
+	masters_check.start(60000);
+}
+
+void ModPS::reload() {
+	QMap<QString,QVariant> conf = getConfig();
+	QStringList conf_masters;
+
+	if (conf.contains("master"))
+		conf_masters = conf.value("master").toString().split(",");
+
+	// make list of current masters
+	QSet<QString> cur_masters;
+
+	for(auto i = masters.constBegin(); i != masters.constEnd(); i++)
+		cur_masters.insert(i.key());
+
+	for(int i = 0; i < conf_masters.size(); i++) {
+		if (masters.contains(conf_masters.at(i))) {
+			// already connected and still in config, ignore
+			cur_masters.remove(conf_masters.at(i));
+			continue;
+		}
+		masters.insert(conf_masters.at(i), NULL);
+	}
+
+	for(auto i = cur_masters.constBegin(); i != cur_masters.constEnd(); i++) {
+		QTcpSocket *t = masters.take(*i);
+		if (t != NULL) {
+			t->close();
+			delete t;
+		}
+	}
+	checkMasters();
+}
+
+void ModPS::checkMasters() {
+	qDebug("Check masters");
+
+	for(auto i = masters.begin(); i != masters.end(); i++) {
+		if (i.value() == NULL) {
+			i.value() = new QTcpSocket(this);
+			connect(i.value(), SIGNAL(readyRead()), this, SLOT(readFromMaster()));
+			connect(i.value(), SIGNAL(connected()), this, SLOT(masterConnected()));
+		}
+
+		if (i.value()->state() == QAbstractSocket::UnconnectedState) {
+			QStringList tmp = i.key().split(":");
+			if (tmp.size() != 2) break; // can't help it
+			qDebug("ModPS: connecting to master %s", qPrintable(i.key()));
+			i.value()->connectToHost(tmp.at(0), tmp.at(1).toInt());
+			break;
+		}
+	}
+}
+
+void ModPS::readFromMaster() {
+	QTcpSocket *s = qobject_cast<QTcpSocket*>(sender());
+	if (s == NULL) return;
+
+	while(true) {
+		if (s->bytesAvailable() < 2) return; // not enough
+		// read packet size
+		QByteArray dat = s->peek(2);
+		int length = (((unsigned char)dat[0] << 8) | (unsigned char)dat[1]) + 2;
+		if (s->bytesAvailable() < length) return; // still not enough
+		pushPacket(s->read(length));
+	}
+}
+
+void ModPS::masterConnected() {
+	QTcpSocket *s = qobject_cast<QTcpSocket*>(sender());
+	if (s == NULL) return;
+	QByteArray packet(3, '\0');
+	packet[1] = 17; // packet size
+	packet[2] = 0x81; // subscribe
+	for(auto i = channel_refcount.constBegin(); i != channel_refcount.constEnd(); i++)
+		s->write(packet+i.key());
+}
+
+void ModPS::doSubscribe(const QByteArray &channel) {
+	QByteArray packet(3, '\0');
+	packet[1] = 17; // packet size
+	packet[2] = 0x81; // subscribe
+	packet.append(channel); // +16 bytes
+	for(auto i = masters.begin(); i != masters.end(); i++) {
+		i.value()->write(packet);
+	}
+}
+
+void ModPS::doUnsubscribe(const QByteArray &channel) {
+	QByteArray packet(3, '\0');
+	packet[1] = 17; // packet size
+	packet[2] = 0x82; // unsubscribe
+	packet.append(channel); // +16 bytes
+	for(auto i = masters.begin(); i != masters.end(); i++) {
+		i.value()->write(packet);
+	}
 }
 
 void ModPS::pushPacket(const QByteArray &dat) {
@@ -49,7 +152,7 @@ void ModPS::channelAddRef(const QByteArray &channel) {
 	if (!channel_refcount.contains(channel)) {
 		channel_refcount.insert(channel, 1);
 		// TODO: subscribe to any master
-		qDebug("ModPS: should subscribe to %s", qPrintable(channel.toHex()));
+		doSubscribe(channel);
 		channel_refcount_lock.unlock();
 		return;
 	}
@@ -63,7 +166,7 @@ void ModPS::channelDelRef(const QByteArray &channel) {
 	if (channel_refcount.value(channel) <= 1) {
 		channel_refcount.remove(channel);
 		// TODO: unsubscribe from any master
-		qDebug("ModPS: should unsubscribe from %s", qPrintable(channel.toHex()));
+		doUnsubscribe(channel);
 		channel_refcount_lock.unlock();
 		return;
 	}

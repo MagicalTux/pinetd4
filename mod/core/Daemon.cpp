@@ -1,10 +1,15 @@
 #include <core/Daemon.hpp>
 #include <core/Client.hpp>
+#include <core/Core.hpp>
 #include <QTcpSocket>
 
 Daemon::Daemon(const QString &_modname, const QString &_instname) {
 	modname = _modname;
 	instname = _instname;
+}
+
+void Daemon::reload() {
+	// reload config in here
 }
 
 void Daemon::incomingTcp(const QString &, QTcpSocket *sock) {
@@ -23,5 +28,9 @@ void Daemon::clientLost(QObject *obj) {
 	QString id = c->getId();
 	qDebug("Daemon: lost client id %s", qPrintable(id));
 	clients.remove(id);
+}
+
+QMap<QString,QVariant> Daemon::getConfig() {
+	return Core::get()->getConfig(instname);
 }
 

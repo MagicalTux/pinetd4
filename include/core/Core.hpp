@@ -3,6 +3,7 @@
 #include <QMap>
 #include <QLibrary>
 #include <QtGlobal>
+#include <QMutex>
 
 class Daemon;
 class CoreTcp;
@@ -15,6 +16,12 @@ class Core: public QObject {
 public:
 	Core();
 	Daemon *getDaemon(const QString &);
+	QMap<QString,QVariant> getConfig(const QString &daemon);
+
+	static Core *get();
+
+signals:
+	void reloadDaemons();
 
 public slots:
 	void reloadSymbols();
@@ -23,6 +30,7 @@ public slots:
 
 private:
 	QSettings settings;
+	QMutex settings_lock;
 	QMap<QString,Daemon*> daemons;
 	QMap<QString,QLibrary*> modules;
 	QMap<QString,CoreTcp*> port_tcp;

@@ -12,9 +12,11 @@ public:
 public slots:
 	virtual void incomingTcp(const QString &entry, QTcpSocket *sock);
 	virtual void clientLost(QObject *);
+	virtual void reload();
 
 protected:
 	void clientAdd(Client *);
+	QMap<QString,QVariant> getConfig();
 
 	QString modname;
 	QString instname;

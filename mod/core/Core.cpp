@@ -10,10 +10,17 @@
 #include <core/CoreUdg.hpp>
 #endif
 
+static Core *core_v;
+
 Core::Core(): settings("pinetd.ini", QSettings::IniFormat) {
 	qDebug("Core: in constructor");
+	core_v = this;
 	reloadSymbols();
 	reloadConfig();
+}
+
+Core *Core::get() {
+	return core_v;
 }
 
 void Core::reloadSymbols() {
@@ -49,6 +56,7 @@ void Core::reloadSymbols() {
 
 void Core::reloadConfig() {
 	qDebug("Core: reloading configuration");
+	settings_lock.lock();
 	do {
 		settings.beginGroup("daemons");
 		QStringList k = settings.allKeys();
@@ -83,6 +91,7 @@ void Core::reloadConfig() {
 			}
 			QThread *t = new QThread(d);
 			d->moveToThread(t);
+			connect(this, SIGNAL(reloadDaemons()), d, SLOT(reload()));
 			t->start();
 			daemons.insert(k.at(i), d);
 		}
@@ -170,6 +179,24 @@ void Core::reloadConfig() {
 		settings.endGroup();
 	} while(0);
 #endif
+	settings_lock.unlock();
+
+	// tell daemons to load their configs (should happen in different threads)
+	reloadDaemons();
+}
+
+QMap<QString,QVariant> Core::getConfig(const QString &daemon) {
+	settings_lock.lock();
+	QMap<QString,QVariant> res;
+
+	settings.beginGroup(QString("conf-")+daemon);
+	QStringList k = settings.allKeys();
+	for(int i = 0; i < k.size(); i++) {
+		res.insert(k.at(i), settings.value(k.at(i)));
+	}
+	settings.endGroup();
+	settings_lock.unlock();
+	return res;
 }
 
 bool Core::modprobe(const QString &name) {
