@@ -45,8 +45,6 @@ void ModPS::reload() {
 }
 
 void ModPS::checkMasters() {
-	qDebug("Check masters");
-
 	for(auto i = masters.begin(); i != masters.end(); i++) {
 		if (i.value() == NULL) {
 			i.value() = new QTcpSocket(this);

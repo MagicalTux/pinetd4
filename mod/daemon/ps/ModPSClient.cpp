@@ -3,7 +3,6 @@
 #include <QTcpSocket>
 
 ModPSClient::ModPSClient(QTcpSocket *sock, ModPS *_parent): ClientTcp(sock, _parent) {
-	qDebug("PS: new client id %s", qPrintable(getId()));
 	parent = _parent;
 //	handleSubscribe(QByteArray::fromHex(getId().toLatin1().replace("-","")));
 }
