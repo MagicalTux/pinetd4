@@ -19,7 +19,6 @@ protected:
 
 private:
 	Core *parent;
-	QString target;
 	QString entry;
 	QObject *receiver;
 };

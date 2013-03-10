@@ -1,33 +1,39 @@
 #include <core/CoreUdg.hpp>
 #include <core/Core.hpp>
 #include <core/Daemon.hpp>
-#include <QStringList>
-#include <QMetaObject>
 #include <core/QUnixDatagramServer.hpp>
 
 CoreUdg::CoreUdg(const QString &socket, Core *_parent): QObject(_parent) {
 	parent = _parent;
 	server = new QUnixDatagramServer(socket, this);
 	connect(server, SIGNAL(message(const QByteArray&)), this, SLOT(message(const QByteArray&)));
+	receiver = NULL;
 }
 
 bool CoreUdg::isValid() const {
 	return server->isValid();
 }
 
-void CoreUdg::setTarget(const QString &t) {
-	QStringList sub = t.split(":");
-	target = sub.at(0);
-	if (sub.size() >= 2) {
-		entry = sub.at(1);
-	} else {
-		entry = "main";
+void CoreUdg::setTarget(QObject *target, const QString &_entry) {
+	if (receiver == target) {
+		entry = _entry;
+		return; // no change
 	}
+	if (receiver != NULL) {
+		disconnect(this, SIGNAL(outgoingDatagram(const QByteArray&)), receiver, SLOT(incomingDatagram(const QByteArray&)));
+		disconnect(receiver, SIGNAL(destroyed(QObject*)), this, SLOT(targetDestroyed(QObject*)));
+		receiver = NULL;
+	}
+
+	receiver = target;
+	entry = _entry;
+	if (receiver == NULL) return; // disconnect
+
+	connect(this, SIGNAL(outgoingDatagram(const QByteArray&)), receiver, SLOT(incomingDatagram(const QByteArray&)));
+	connect(receiver, SIGNAL(destroyed(QObject*)), this, SLOT(targetDestroyed(QObject*)));
 }
 
 void CoreUdg::message(const QByteArray &msg) {
-	Daemon *d = parent->getDaemon(target);
-	if (d == NULL) return;
-	QMetaObject::invokeMethod(d, "incomingDatagram", Q_ARG(const QByteArray&, msg));
+	outgoingDatagram(msg);
 }
 

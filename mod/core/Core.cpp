@@ -146,9 +146,12 @@ void Core::reloadConfig() {
 			cur_udg.insert(i.key());
 
 		for(int i = 0; i < k.size(); i++) {
+			QStringList tgt = settings.value(k.at(i)).toString().split(":");
+			if (tgt.size() == 1) tgt.append("main");
+
 			if (port_udg.contains(k.at(i))) {
 				// already linked to somewhere, remove and re-add with new value
-				port_udg.value(k.at(i))->setTarget(settings.value(k.at(i)).toString());
+				port_udg.value(k.at(i))->setTarget(getDaemon(tgt.at(0)), tgt.at(1));
 				cur_udg.remove(k.at(i));
 				continue;
 			}
@@ -157,7 +160,7 @@ void Core::reloadConfig() {
 				qDebug("Failed to listen on %s, giving up", qPrintable(k.at(i)));
 				continue;
 			}
-			t->setTarget(settings.value(k.at(i)).toString());
+			t->setTarget(getDaemon(tgt.at(0)), tgt.at(1));
 			port_udg.insert(k.at(i), t);
 		}
 

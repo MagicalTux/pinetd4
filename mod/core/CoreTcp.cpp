@@ -2,8 +2,6 @@
 #include <core/Core.hpp>
 #include <core/Daemon.hpp>
 #include <QTcpSocket>
-#include <QStringList>
-#include <QMetaObject>
 
 CoreTcp::CoreTcp(Core *_parent): QTcpServer(_parent) {
 	parent = _parent;
