@@ -1,16 +1,20 @@
 <?php
 
-$sock = fsockopen('127.0.0.1', 20001);
+$sock = fsockopen('54.249.253.138', 65000);
 if (!$sock) die();
 
 
-$echodata = microtime(true);
-$packet = chr(0x80).$echodata; // 0x80 = echo
-$packet = pack('n', strlen($packet)).$packet;
-fwrite($sock, $packet);
+function pkt_ping() {
+	$echodata = microtime(true);
+	$packet = chr(0x80).$echodata; // 0x80 = echo
+	$packet = pack('n', strlen($packet)).$packet;
+	return $packet;
+}
+
+fwrite($sock, pkt_ping());
 
 // subscribe to channel too
-$channel = 'c7825f96-6ad7-4bc3-bf5a-668e04650bc2';
+$channel = 'dbf1dee9-4f2e-4a08-8cb7-748919a71b21';
 $packet = chr(0x81).pack('H*', str_replace('-', '', $channel)); // 0x81 = subscribe
 $packet = pack('n', strlen($packet)).$packet;
 fwrite($sock, $packet);
@@ -20,7 +24,11 @@ $buf = '';
 while(true) {
 	$tmp = fread($sock, 8192);
 	if ($tmp === false) break;
-	if ($tmp === '') break;
+	if ($tmp === '') {
+		// try to do a new ping
+		fwrite($sock, pkt_ping());
+		continue;
+	}
 	$buf .= $tmp;
 
 	while(true) {
