@@ -1,2 +1,2 @@
 TEMPLATE = subdirs
-SUBDIRS = echo chargen chargensame broadcast ps
+SUBDIRS = echo chargen chargensame broadcast ps kumoircd
