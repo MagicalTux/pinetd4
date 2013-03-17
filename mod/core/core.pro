@@ -9,7 +9,7 @@ QT += network
 QT -= gui
 
 # allows qt to not create a bunch of useless symlinks
-CONFIG += plugin
+CONFIG += plugin debug
 
 QMAKE_CXXFLAGS += -std=gnu++0x
 

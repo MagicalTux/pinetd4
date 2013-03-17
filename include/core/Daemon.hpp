@@ -8,6 +8,7 @@ class Daemon: public QObject {
 	Q_OBJECT;
 public:
 	Daemon(const QString &modname, const QString &instname);
+	const QString &instanceName() const;
 
 public slots:
 	virtual void incomingTcp(const QString &entry, QTcpSocket *sock);

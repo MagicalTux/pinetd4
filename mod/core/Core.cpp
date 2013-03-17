@@ -62,6 +62,19 @@ void Core::reloadConfig() {
 	qDebug("Core: reloading configuration");
 	settings_lock.lock();
 	do {
+		settings.beginGroup("preload");
+		QStringList k = settings.allKeys();
+
+		for(int i = 0; i < k.size(); i++) {
+			QString mod_name = settings.value(k.at(i)).toString();
+			qDebug("Core: loading module %s", qPrintable(mod_name));
+			modprobe(mod_name);
+		}
+
+		settings.endGroup();
+	} while(0);
+
+	do {
 		settings.beginGroup("daemons");
 		QStringList k = settings.allKeys();
 
@@ -240,6 +253,7 @@ bool Core::modprobe(const QString &name) {
 			delete lib;
 			return false;
 		}
+		qDebug("Core: Managed to load %s", qPrintable(name));
 		break;
 	}
 

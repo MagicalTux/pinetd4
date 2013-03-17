@@ -1,3 +1,25 @@
+ext/bitcoin _ZGVZN14BitcoinNetAddr4nullEvE7nullval guard variable for BitcoinNetAddr::null()::nullval
+ext/bitcoin _ZGVZNK14BitcoinNetAddr6getBinEvE9null_addr guard variable for BitcoinNetAddr::getBin() const::null_addr
+ext/bitcoin _ZN10QByteArrayD1Ev QByteArray::~QByteArray()
+ext/bitcoin _ZN10QByteArrayD2Ev QByteArray::~QByteArray()
+ext/bitcoin _ZN14BitcoinNetAddr10decode_binEv BitcoinNetAddr::decode_bin()
+ext/bitcoin _ZN14BitcoinNetAddr4nullEv BitcoinNetAddr::null()
+ext/bitcoin _ZN14BitcoinNetAddr9decode_hpEv BitcoinNetAddr::decode_hp()
+ext/bitcoin _ZN14BitcoinNetAddrC1ERK10QByteArray BitcoinNetAddr::BitcoinNetAddr(QByteArray const&)
+ext/bitcoin _ZN14BitcoinNetAddrC1ERK12QHostAddressty BitcoinNetAddr::BitcoinNetAddr(QHostAddress const&, unsigned short, unsigned long long)
+ext/bitcoin _ZN14BitcoinNetAddrC1Ev BitcoinNetAddr::BitcoinNetAddr()
+ext/bitcoin _ZN14BitcoinNetAddrC2ERK10QByteArray BitcoinNetAddr::BitcoinNetAddr(QByteArray const&)
+ext/bitcoin _ZN14BitcoinNetAddrC2ERK12QHostAddressty BitcoinNetAddr::BitcoinNetAddr(QHostAddress const&, unsigned short, unsigned long long)
+ext/bitcoin _ZN14BitcoinNetAddrC2Ev BitcoinNetAddr::BitcoinNetAddr()
+ext/bitcoin _ZN14BitcoinNetAddrD1Ev BitcoinNetAddr::~BitcoinNetAddr()
+ext/bitcoin _ZN14BitcoinNetAddrD2Ev BitcoinNetAddr::~BitcoinNetAddr()
+ext/bitcoin _ZNK14BitcoinNetAddr11getServicesEv BitcoinNetAddr::getServices() const
+ext/bitcoin _ZNK14BitcoinNetAddr6getBinEv BitcoinNetAddr::getBin() const
+ext/bitcoin _ZNK14BitcoinNetAddr7getAddrEv BitcoinNetAddr::getAddr() const
+ext/bitcoin _ZNK14BitcoinNetAddr7getPortEv BitcoinNetAddr::getPort() const
+ext/bitcoin _ZNK14BitcoinNetAddr7isValidEv BitcoinNetAddr::isValid() const
+ext/bitcoin _ZZN14BitcoinNetAddr4nullEvE7nullval BitcoinNetAddr::null()::nullval
+ext/bitcoin _ZZNK14BitcoinNetAddr6getBinEvE9null_addr BitcoinNetAddr::getBin() const::null_addr
 ext/tcpline _ZL26qt_meta_data_ClientTcpLine qt_meta_data_ClientTcpLine
 ext/tcpline _ZL32qt_meta_stringdata_ClientTcpLine qt_meta_stringdata_ClientTcpLine
 ext/tcpline _ZN10QByteArrayD1Ev QByteArray::~QByteArray()
@@ -13,6 +35,9 @@ ext/tcpline _ZN13ClientTcpLineC2EP10QTcpSocketP6Daemon ClientTcpLine::ClientTcpL
 ext/tcpline _ZN13ClientTcpLineD0Ev ClientTcpLine::~ClientTcpLine()
 ext/tcpline _ZN13ClientTcpLineD1Ev ClientTcpLine::~ClientTcpLine()
 ext/tcpline _ZN13ClientTcpLineD2Ev ClientTcpLine::~ClientTcpLine()
+ext/tcpline _ZN9ClientTcpD0Ev ClientTcp::~ClientTcp()
+ext/tcpline _ZN9ClientTcpD1Ev ClientTcp::~ClientTcp()
+ext/tcpline _ZN9ClientTcpD2Ev ClientTcp::~ClientTcp()
 ext/tcpline _ZNK13ClientTcpLine10metaObjectEv ClientTcpLine::metaObject() const
 ext/tcpline _ZTI13ClientTcpLine typeinfo for ClientTcpLine
 ext/tcpline _ZTS13ClientTcpLine typeinfo name for ClientTcpLine

@@ -12,6 +12,10 @@ void Daemon::reload() {
 	// reload config in here
 }
 
+const QString &Daemon::instanceName() const {
+	return instname;
+}
+
 void Daemon::incomingTcp(const QString &, QTcpSocket *sock) {
 	qDebug("Daemon: got incoming TCP connection without handler, closing it");
 	sock->close();

@@ -1,2 +1,2 @@
 TEMPLATE = subdirs
-SUBDIRS = tcpline
+SUBDIRS = tcpline bitcoin
