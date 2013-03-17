@@ -4,7 +4,14 @@ Fourth evolution of pInetd, this time written in C++ and based on Qt
 
 http://www.pinetd.com
 
-# Compilation
+# Installation
+
+## Requirements
+
+* Qt 4.8 or newer
+* QCA
+
+## Compilation
 
 Compiling is easy.
 
