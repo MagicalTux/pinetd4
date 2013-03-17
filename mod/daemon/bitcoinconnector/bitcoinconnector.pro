@@ -7,8 +7,6 @@ INCLUDEPATH += . ../../../include
 QT -= gui
 QT += network sql
 
-CONFIG += crypto debug
-
 # allows qt to not create a bunch of useless symlinks
 CONFIG += plugin
 

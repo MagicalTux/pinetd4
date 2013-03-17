@@ -31,6 +31,50 @@ quint32 ModBitcoinConnector::getBlockHeight() const {
 	return 0;
 }
 
+QByteArray ModBitcoinConnector::getInventory(quint32 type, const QByteArray &hash) {
+	QByteArray key;
+	QDataStream s(&key, QIODevice::WriteOnly); s.setByteOrder(QDataStream::LittleEndian); s << type;
+	key.append(hash);
+
+	if (inventory_cache.contains(key)) return *inventory_cache.object(key);
+
+	if (type == 1) {
+		db_lock.lock();
+		SQL_QUERY(query, "SELECT data FROM tx_cache WHERE txid = :txid");
+		SQL_BIND(query, txid, hash);
+		if (!query.exec()) {
+			db_lock.unlock();
+			return QByteArray(); // error
+		}
+		if (!query.next()) {
+			db_lock.unlock();
+			return QByteArray(); // wat?
+		}
+		QByteArray res = query.value(0).toByteArray();
+		inventory_cache.insert(key, new QByteArray(res));
+		db_lock.unlock();
+		return res;
+	}
+	if (type == 2) {
+		db_lock.lock();
+		SQL_QUERY(query, "SELECT data FROM blocks WHERE hash = :hash");
+		SQL_BIND(query, hash, hash);
+		if (!query.exec()) {
+			db_lock.unlock();
+			return QByteArray(); // error
+		}
+		if (!query.next()) {
+			db_lock.unlock();
+			return QByteArray(); // wat?
+		}
+		QByteArray res = query.value(0).toByteArray();
+		inventory_cache.insert(key, new QByteArray(res));
+		db_lock.unlock();
+		return res;
+	}
+	return QByteArray();
+}
+
 bool ModBitcoinConnector::knows(quint32 type, const QByteArray &hash) {
 	QByteArray key;
 	QDataStream s(&key, QIODevice::WriteOnly); s.setByteOrder(QDataStream::LittleEndian); s << type;

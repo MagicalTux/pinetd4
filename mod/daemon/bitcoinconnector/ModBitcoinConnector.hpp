@@ -22,6 +22,7 @@ public:
 
 	bool knows(quint32 type, const QByteArray &hash);
 	void addInventory(quint32 type, const QByteArray &hash, const QByteArray &data);
+	QByteArray getInventory(quint32 type, const QByteArray &hash);
 
 signals:
 	void newInventory(quint32 count, const QByteArray &);

@@ -4,10 +4,10 @@
 #include <QDateTime>
 #include <QUuid>
 #include <QHostAddress>
-#include <QtCrypto>
 #include <QMetaMethod>
 #include <QMutex>
 #include <ext/BitcoinNetAddr.hpp>
+#include <ext/BitcoinCrypto.hpp>
 
 // for details on generation, see
 // http://tools.ietf.org/html/rfc864
@@ -39,16 +39,61 @@ void ModBitcoinConnectorClient::bitcoin_packet_addr(const QByteArray&pkt) {
 }
 
 void ModBitcoinConnectorClient::bitcoin_packet_block(const QByteArray&block) {
-	QByteArray hash = doubleSha256(block);
+	QByteArray hash = BitcoinCrypto::doubleSha256(block);
 	if (parent->knows(2, hash)) return; // already know this one
 	parent->addInventory(2, hash, block);
 }
 
 void ModBitcoinConnectorClient::bitcoin_packet_tx(const QByteArray&tx) {
 	// compute tx's hash
-	QByteArray hash = doubleSha256(tx);
+	QByteArray hash = BitcoinCrypto::doubleSha256(tx);
 	if (parent->knows(1, hash)) return; // already know this one
 	parent->addInventory(1, hash, tx);
+}
+
+void ModBitcoinConnectorClient::bitcoin_packet_getdata(const QByteArray&pkt) {
+	QDataStream pkt_r(pkt);
+	pkt_r.setByteOrder(QDataStream::LittleEndian);
+
+	qint64 get_count = 0;
+	QByteArray get_buf;
+	QDataStream get_buf_w(&get_buf, QIODevice::WriteOnly);
+	get_buf_w.setByteOrder(QDataStream::LittleEndian);
+
+	qint64 count = readInt(pkt_r);
+	if (pkt.length() < (36*count)) { // TODO: account for length's size (get get_buf_w's position)
+		qDebug("incomplete inv, dropped");
+		return; // drop incomplete packet
+	}
+	for(qint64 i = 0; i < count; i++) {
+		quint32 type;
+		QByteArray hash;
+		pkt_r >> type;
+		hash = readData(pkt_r, 32);
+		if (parent->knows(type, hash)) {
+			qDebug("sending data for %d:%s", type, qPrintable(hash.toHex()));
+			QByteArray res = parent->getInventory(type, hash);
+			switch(type) {
+				case 1: sendPacket("tx", res); break;
+				case 2: sendPacket("block", res); break;
+			}
+			continue;
+		}
+
+		get_count++;
+		get_buf_w << type;
+		writeData(get_buf_w, hash);
+	}
+
+	if (get_count > 0) {
+		QByteArray get_buf_len;
+		QDataStream get_buf_len_w(&get_buf_len, QIODevice::WriteOnly);
+		get_buf_len_w.setByteOrder(QDataStream::LittleEndian);
+		writeInt(get_buf_len_w, get_count);
+
+		qDebug("sending notfound: %s.%s", qPrintable(get_buf_len.toHex()), qPrintable(get_buf.toHex()));
+		sendPacket("notfound", get_buf_len+get_buf);
+	}
 }
 
 void ModBitcoinConnectorClient::bitcoin_packet_inv(const QByteArray&pkt) {
@@ -144,7 +189,7 @@ void ModBitcoinConnectorClient::handleBuffer(const QByteArray &data) {
 		QByteArray pkt_data = in_buf.mid(24, len);
 	
 		// compute checksum for data
-		QByteArray hashResult = doubleSha256(pkt_data);
+		QByteArray hashResult = BitcoinCrypto::doubleSha256(pkt_data);
 	
 		if (in_buf.mid(20, 4) != hashResult.left(4)) {
 			qDebug("Got invalid hash from peer, giving up");
@@ -184,7 +229,7 @@ void ModBitcoinConnectorClient::sendPacket(const QByteArray &type, const QByteAr
 	pkt_w.device()->seek(16);
 
 	// compute checksum for data
-	QByteArray hashResult = doubleSha256(data);
+	QByteArray hashResult = BitcoinCrypto::doubleSha256(data);
 
 	pkt_w << (quint32)data.length();
 	writeData(pkt_w, hashResult.left(4)); // the checksum
@@ -284,21 +329,5 @@ QByteArray ModBitcoinConnectorClient::readData(QDataStream &stream, int len) {
 	int res = stream.readRawData(final.data(), len);
 	if (res < len) final.truncate(res);
 	return final;
-}
-
-QByteArray ModBitcoinConnectorClient::doubleSha256(const QByteArray &input) {
-	// compute checksum for data
-	// Do not instanciate a sha object each time for faster processing
-	static QMutex shamutex;
-	shamutex.lock();
-	static QCA::Hash sha("sha256");
-	sha.clear();
-	sha.update(input);
-	QByteArray hashResult = sha.final().toByteArray();
-	sha.clear();
-	sha.update(hashResult);
-	hashResult = sha.final().toByteArray();
-	shamutex.unlock();
-	return hashResult;
 }
 

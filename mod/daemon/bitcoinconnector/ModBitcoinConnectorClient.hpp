@@ -19,12 +19,12 @@ public slots:
 	void bitcoin_packet_tx(const QByteArray&);
 	void bitcoin_packet_addr(const QByteArray&);
 	void bitcoin_packet_block(const QByteArray&);
+	void bitcoin_packet_getdata(const QByteArray&);
 
 	void newInventory(quint32, const QByteArray&);
 
 protected:
 	void handleBuffer(const QByteArray&);
-	QByteArray doubleSha256(const QByteArray &input);
 
 private:
 	int bitcoin_version; // Starting 2012-02-20 00:00:00 default version number is 209 - this forces version packet to be checksummed
