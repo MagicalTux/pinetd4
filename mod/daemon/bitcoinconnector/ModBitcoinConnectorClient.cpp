@@ -8,6 +8,8 @@
 #include <QMutex>
 #include <ext/BitcoinNetAddr.hpp>
 #include <ext/BitcoinCrypto.hpp>
+#include <ext/BitcoinStream.hpp>
+#include <ext/BitcoinBlock.hpp>
 
 // for details on generation, see
 // http://tools.ietf.org/html/rfc864
@@ -28,7 +30,7 @@ void ModBitcoinConnectorClient::bitcoin_packet_addr(const QByteArray&pkt) {
 	QDataStream pkt_r(pkt);
 	pkt_r.setByteOrder(QDataStream::LittleEndian);
 
-	qint64 count = readInt(pkt_r);
+	qint64 count = BitcoinStream::readInt(pkt_r);
 	if (pkt.length() < (30*count)) { // TODO: account for length's size (get get_buf_w's position)
 		qDebug("incomplete addr, dropped");
 		return;
@@ -39,9 +41,20 @@ void ModBitcoinConnectorClient::bitcoin_packet_addr(const QByteArray&pkt) {
 }
 
 void ModBitcoinConnectorClient::bitcoin_packet_block(const QByteArray&block) {
-	QByteArray hash = BitcoinCrypto::doubleSha256(block);
-	if (parent->knows(2, hash)) return; // already know this one
-	parent->addInventory(2, hash, block);
+	BitcoinBlock bl(block);
+	if (parent->knows(2, bl.getHash())) return; // already know this one
+	parent->addBlock(bl);
+
+	if (!parent->knows(2, bl.getParent())) {
+		// we don't know the parent of this block, ask it
+		qDebug("missing block %s, requesting", qPrintable(bl.getParent().toHex()));
+		QByteArray buf;
+		QDataStream buf_w(&buf, QIODevice::WriteOnly);
+		BitcoinStream::writeInt(buf_w, 1);
+		buf_w << (quint32)2;
+		BitcoinStream::writeData(buf_w, bl.getParent());
+		sendPacket("getdata", buf);
+	}
 }
 
 void ModBitcoinConnectorClient::bitcoin_packet_tx(const QByteArray&tx) {
@@ -60,7 +73,7 @@ void ModBitcoinConnectorClient::bitcoin_packet_getdata(const QByteArray&pkt) {
 	QDataStream get_buf_w(&get_buf, QIODevice::WriteOnly);
 	get_buf_w.setByteOrder(QDataStream::LittleEndian);
 
-	qint64 count = readInt(pkt_r);
+	qint64 count = BitcoinStream::readInt(pkt_r);
 	if (pkt.length() < (36*count)) { // TODO: account for length's size (get get_buf_w's position)
 		qDebug("incomplete inv, dropped");
 		return; // drop incomplete packet
@@ -69,7 +82,7 @@ void ModBitcoinConnectorClient::bitcoin_packet_getdata(const QByteArray&pkt) {
 		quint32 type;
 		QByteArray hash;
 		pkt_r >> type;
-		hash = readData(pkt_r, 32);
+		hash = BitcoinStream::readData(pkt_r, 32);
 		if (parent->knows(type, hash)) {
 			qDebug("sending data for %d:%s", type, qPrintable(hash.toHex()));
 			QByteArray res = parent->getInventory(type, hash);
@@ -82,14 +95,14 @@ void ModBitcoinConnectorClient::bitcoin_packet_getdata(const QByteArray&pkt) {
 
 		get_count++;
 		get_buf_w << type;
-		writeData(get_buf_w, hash);
+		BitcoinStream::writeData(get_buf_w, hash);
 	}
 
 	if (get_count > 0) {
 		QByteArray get_buf_len;
 		QDataStream get_buf_len_w(&get_buf_len, QIODevice::WriteOnly);
 		get_buf_len_w.setByteOrder(QDataStream::LittleEndian);
-		writeInt(get_buf_len_w, get_count);
+		BitcoinStream::writeInt(get_buf_len_w, get_count);
 
 		qDebug("sending notfound: %s.%s", qPrintable(get_buf_len.toHex()), qPrintable(get_buf.toHex()));
 		sendPacket("notfound", get_buf_len+get_buf);
@@ -105,7 +118,7 @@ void ModBitcoinConnectorClient::bitcoin_packet_inv(const QByteArray&pkt) {
 	QDataStream get_buf_w(&get_buf, QIODevice::WriteOnly);
 	get_buf_w.setByteOrder(QDataStream::LittleEndian);
 
-	qint64 count = readInt(pkt_r);
+	qint64 count = BitcoinStream::readInt(pkt_r);
 	if (pkt.length() < (36*count)) { // TODO: account for length's size (get get_buf_w's position)
 		qDebug("incomplete inv, dropped");
 		return; // drop incomplete packet
@@ -114,19 +127,19 @@ void ModBitcoinConnectorClient::bitcoin_packet_inv(const QByteArray&pkt) {
 		quint32 type;
 		QByteArray hash;
 		pkt_r >> type;
-		hash = readData(pkt_r, 32);
+		hash = BitcoinStream::readData(pkt_r, 32);
 		if (parent->knows(type, hash)) continue;
 
 		get_count++;
 		get_buf_w << type;
-		writeData(get_buf_w, hash);
+		BitcoinStream::writeData(get_buf_w, hash);
 	}
 
 	if (get_count > 0) {
 		QByteArray get_buf_len;
 		QDataStream get_buf_len_w(&get_buf_len, QIODevice::WriteOnly);
 		get_buf_len_w.setByteOrder(QDataStream::LittleEndian);
-		writeInt(get_buf_len_w, get_count);
+		BitcoinStream::writeInt(get_buf_len_w, get_count);
 
 //		qDebug("sending getdata: %s.%s", qPrintable(get_buf_len.toHex()), qPrintable(get_buf.toHex()));
 		sendPacket("getdata", get_buf_len+get_buf);
@@ -142,14 +155,14 @@ void ModBitcoinConnectorClient::bitcoin_packet_version(const QByteArray&pkt) {
 	pkt_r.skipRawData(26); // my addr
 	if (!pkt_r.atEnd()) {
 		pkt_r.skipRawData(26); // remote addr - use that to register node
-		QByteArray r_nonce = readData(pkt_r, 8);
+		QByteArray r_nonce = BitcoinStream::readData(pkt_r, 8);
 		if (parent->knownNonce(r_nonce)) {
 			qDebug("connected to self by accident");
 			sock->close();
 			deleteLater();
 			return;
 		}
-		remote_user_agent = readString(pkt_r);
+		remote_user_agent = BitcoinStream::readString(pkt_r);
 		pkt_r >> remote_height;
 	}
 
@@ -214,7 +227,7 @@ void ModBitcoinConnectorClient::newInventory(quint32 cnt, const QByteArray&dat) 
 	QByteArray pkt;
 	QDataStream pkt_w(&pkt, QIODevice::WriteOnly);
 	pkt_w.setByteOrder(QDataStream::LittleEndian);
-	writeInt(pkt_w, cnt);
+	BitcoinStream::writeInt(pkt_w, cnt);
 
 	sendPacket("inv", pkt+dat);
 }
@@ -232,8 +245,8 @@ void ModBitcoinConnectorClient::sendPacket(const QByteArray &type, const QByteAr
 	QByteArray hashResult = BitcoinCrypto::doubleSha256(data);
 
 	pkt_w << (quint32)data.length();
-	writeData(pkt_w, hashResult.left(4)); // the checksum
-	writeData(pkt_w, data);
+	BitcoinStream::writeData(pkt_w, hashResult.left(4)); // the checksum
+	BitcoinStream::writeData(pkt_w, data);
 
 //	qDebug("Writing: %s", qPrintable(pkt.toHex()));
 	sock->write(pkt);
@@ -253,81 +266,13 @@ void ModBitcoinConnectorClient::sendVersion() {
 	pkt_w.setByteOrder(QDataStream::LittleEndian);
 	pkt_w << version << services << timestamp;
 
-	writeAddress(pkt_w, BitcoinNetAddr(sock->peerAddress(), sock->peerPort()));
-	writeAddress(pkt_w, BitcoinNetAddr::null());
-	writeData(pkt_w, bitcoin_nonce);
-	writeString(pkt_w, "/BitcoinConnector:0.1(pinetd4)/");
+	BitcoinStream::writeAddress(pkt_w, BitcoinNetAddr(sock->peerAddress(), sock->peerPort()));
+	BitcoinStream::writeAddress(pkt_w, BitcoinNetAddr::null());
+	BitcoinStream::writeData(pkt_w, bitcoin_nonce);
+	BitcoinStream::writeString(pkt_w, "/BitcoinConnector:0.1(pinetd4)/");
 	pkt_w << (quint32)parent->getBlockHeight();
 //	pkt_w << (quint8)1; // relay
 
 	sendPacket("version", pkt);
-}
-
-void ModBitcoinConnectorClient::writeAddress(QDataStream &stream, const BitcoinNetAddr &addr) {
-	writeData(stream, addr.getBin());
-}
-
-void ModBitcoinConnectorClient::writeString(QDataStream &stream, const QByteArray &string) {
-	writeInt(stream, string.length());
-	writeData(stream, string);
-}
-
-void ModBitcoinConnectorClient::writeInt(QDataStream &stream, quint64 i) {
-	if (i < 253) {
-		stream << (quint8)i;
-		return;
-	}
-	if (i < 0xffff) {
-		stream << (quint8)253 << (quint16)i;
-		return;
-	}
-	if (i < 0xffffffff) {
-		stream << (quint8)254 << (quint32)i;
-		return;
-	}
-	stream << (quint8)255 << i;
-}
-
-void ModBitcoinConnectorClient::writeData(QDataStream &stream, const QByteArray &data) {
-	stream.writeRawData(data.constData(), data.length());
-}
-
-quint64 ModBitcoinConnectorClient::readInt(QDataStream &stream) {
-	quint8 i;
-	stream >> i;
-	switch(i) {
-		case 253:
-			{
-				quint16 j;
-				stream >> j;
-				return j;
-			}
-		case 254:
-			{
-				quint32 j;
-				stream >> j;
-				return j;
-			}
-		case 255:
-			{
-				quint64 j;
-				stream >> j;
-				return j;
-			}
-		default:
-			return i;
-	}
-}
-
-QByteArray ModBitcoinConnectorClient::readString(QDataStream &stream) {
-	qint64 len = readInt(stream);
-	return readData(stream, len);
-}
-
-QByteArray ModBitcoinConnectorClient::readData(QDataStream &stream, int len) {
-	QByteArray final(len, '\0');
-	int res = stream.readRawData(final.data(), len);
-	if (res < len) final.truncate(res);
-	return final;
 }
 

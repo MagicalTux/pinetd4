@@ -39,15 +39,6 @@ private:
 	QByteArray remote_user_agent;
 	qint32 remote_height;
 
-	void writeAddress(QDataStream &stream, const BitcoinNetAddr &addr);
-	void writeString(QDataStream &stream, const QByteArray &string);
-	void writeInt(QDataStream &stream, quint64 i);
-	void writeData(QDataStream &stream, const QByteArray &data);
-
-	quint64 readInt(QDataStream &stream);
-	QByteArray readString(QDataStream &stream);
-	QByteArray readData(QDataStream &stream, int len);
-
 	void sendPacket(const QByteArray &type, const QByteArray &data);
 
 	QByteArray in_buf;

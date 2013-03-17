@@ -8,6 +8,7 @@
 
 class QTcpSocket;
 class ModBitcoinConnectorClient;
+class BitcoinBlock;
 
 class ModBitcoinConnector: public Daemon {
 	Q_OBJECT;
@@ -22,7 +23,10 @@ public:
 
 	bool knows(quint32 type, const QByteArray &hash);
 	void addInventory(quint32 type, const QByteArray &hash, const QByteArray &data);
+	void addBlock(const BitcoinBlock&);
 	QByteArray getInventory(quint32 type, const QByteArray &hash);
+
+	BitcoinBlock getBlock(const QByteArray &hash);
 
 signals:
 	void newInventory(quint32 count, const QByteArray &);

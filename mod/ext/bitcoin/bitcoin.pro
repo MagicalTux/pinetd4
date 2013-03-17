@@ -12,5 +12,6 @@ CONFIG += plugin
 CONFIG += crypto
 
 # Input
-SOURCES += BitcoinNetAddr.cpp BitcoinCrypto.cpp
+SOURCES += BitcoinNetAddr.cpp BitcoinCrypto.cpp BitcoinStream.cpp
+SOURCES += BitcoinBlock.cpp
 #HEADERS += 

@@ -6,6 +6,7 @@
 #include <QSqlQuery>
 #include <QSqlError>
 #include <ext/BitcoinNetAddr.hpp>
+#include <ext/BitcoinBlock.hpp>
 
 #if 0
 #define SQL_QUERY(_var, _req) static bool req_prepared_ ## _var = false; QSqlQuery _var(db); if (!req_prepared_ ## _var) { req_prepared_ ## _var = true; _var.prepare(_req); _var.setForwardOnly(true); }
@@ -29,6 +30,12 @@ const QByteArray &ModBitcoinConnector::getClientId() const {
 
 quint32 ModBitcoinConnector::getBlockHeight() const {
 	return 0;
+}
+
+BitcoinBlock ModBitcoinConnector::getBlock(const QByteArray &hash) {
+	QByteArray data = getInventory(2, hash);
+	if (data.isEmpty()) return BitcoinBlock();
+	return BitcoinBlock(data);
 }
 
 QByteArray ModBitcoinConnector::getInventory(quint32 type, const QByteArray &hash) {
@@ -147,6 +154,30 @@ void ModBitcoinConnector::addInventory(quint32 type, const QByteArray &hash, con
 	}
 }
 
+void ModBitcoinConnector::addBlock(const BitcoinBlock&block) {
+	if (!block.isValid()) return;
+
+	quint32 type = 2;
+	QByteArray hash = block.getHash();
+	QByteArray parent = block.getParent();
+	QByteArray raw = block.getRaw();
+	QByteArray key;
+	QDataStream s(&key, QIODevice::WriteOnly); s.setByteOrder(QDataStream::LittleEndian); s << type;
+	key.append(hash);
+
+	inventory_cache.insert(key, new QByteArray(block.getRaw()));
+	inventory_queue.append(key);
+
+	db_lock.lock();
+	SQL_QUERY(query, "INSERT INTO blocks (hash, parent, data) VALUES (:hash, :parent, :blob)");
+	SQL_BIND(query, hash, hash);
+	SQL_BIND(query, parent, parent);
+	SQL_BIND(query, blob, raw);
+	if (!query.exec())
+		qDebug("failed to exec query: %s", qPrintable(query.lastError().text()));
+	db_lock.unlock();
+}
+
 void ModBitcoinConnector::sendQueuedInventory() {
 	if (inventory_queue.isEmpty()) return;
 	QByteArray buf;
@@ -220,6 +251,13 @@ void ModBitcoinConnector::reload() {
 		QStringList tmp = conf_peers.at(i).split(":");
 		if (tmp.size() != 2) continue; // meh?
 		tmpsock->connectToHost(tmp.at(0), tmp.at(1).toInt());
+	}
+
+	// test
+	BitcoinBlock bl = getBlock(QByteArray::fromHex("22922243e158b2a6c5446ced748d4cfc279dc29d8f2e59fd6426423a03c5dea9"));
+	if (bl.isValid()) {
+		qDebug("VALID!");
+		qDebug("parent block: %s => %s", qPrintable(bl.getHash().toHex()), qPrintable(bl.getParent().toHex()));
 	}
 }
 
