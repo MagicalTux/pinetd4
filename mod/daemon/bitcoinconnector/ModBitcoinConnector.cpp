@@ -171,7 +171,7 @@ void ModBitcoinConnector::addInventory(quint32 type, const QByteArray &hash, con
 	QDataStream s(&key, QIODevice::WriteOnly); s.setByteOrder(QDataStream::LittleEndian); s << type;
 	key.append(hash);
 
-	qDebug("ModBitcoinConnector: recording %d:%s", type, qPrintable(hash.toHex()));
+//	qDebug("ModBitcoinConnector: recording %d:%s", type, qPrintable(hash.toHex()));
 	inventory_cache.insert(key, new QByteArray(data));
 	inventory_queue.append(key);
 
@@ -185,13 +185,8 @@ void ModBitcoinConnector::addInventory(quint32 type, const QByteArray &hash, con
 		db_lock.unlock();
 	}
 	if (type == 2) {
-		db_lock.lock();
-		SQL_QUERY(query, "INSERT INTO blocks (hash, data) VALUES (:hash, :blob)");
-		SQL_BIND(query, hash, hash);
-		SQL_BIND(query, blob, data);
-		if (!query.exec())
-			qDebug("failed to exec query: %s", qPrintable(query.lastError().text()));
-		db_lock.unlock();
+		qDebug("cannot use this method to save blocks");
+		abort();
 	}
 }
 
