@@ -10,6 +10,7 @@ http://www.pinetd.com
 
 * Qt 4.8 or newer
 * QCA
+* qca-ossl
 
 ## Compilation
 

@@ -6,20 +6,50 @@ BitcoinBlock::BitcoinBlock() {
 	is_valid = false;
 }
 
-BitcoinBlock::BitcoinBlock(const QByteArray &data) {
+BitcoinBlock::BitcoinBlock(const QByteArray &data, quint32 _height) {
 	is_valid = true;
+	height = _height;
 	hash = BitcoinCrypto::doubleSha256(data.left(80));
-	raw = data;
-	QDataStream data_r(data);
+	raw = data.left(80);
+	if (data.length() > 80) {
+		txns = data.mid(80);
+	}
+	QDataStream data_r(raw);
+	data_r.setByteOrder(QDataStream::LittleEndian);
 	data_r >> version;
 	parent = BitcoinStream::readData(data_r, 32);
 	merkle_root = BitcoinStream::readData(data_r, 32);
 	data_r >> timestamp >> bits >> nonce;
-	txn_count = BitcoinStream::readInt(data_r);
+}
+
+void BitcoinBlock::setHeight(quint32 h) {
+	height = h;
+}
+
+quint32 BitcoinBlock::getHeight() const {
+	return height;
+}
+
+QList<BitcoinTx> BitcoinBlock::getTransactions() const {
+	if (txns.isEmpty()) return QList<BitcoinTx>();
+	QList<BitcoinTx> res;
+	QDataStream txns_r(txns);
+	txns_r.setByteOrder(QDataStream::LittleEndian);
+	quint64 count = BitcoinStream::readInt(txns_r);
+	for(quint64 i = 0; i < count; i++)
+		res.append(BitcoinTx(txns_r));
+	return res;
 }
 
 const QByteArray &BitcoinBlock::getRaw() const {
 	return raw;
+}
+
+QByteArray BitcoinBlock::getHexHash() const {
+	QByteArray res;
+	for(int i = hash.length() - 1; i >= 0; i--)
+		res.append(hash.at(i));
+	return res.toHex();
 }
 
 const QByteArray &BitcoinBlock::getHash() const {

@@ -20,8 +20,10 @@ public slots:
 	void bitcoin_packet_addr(const QByteArray&);
 	void bitcoin_packet_block(const QByteArray&);
 	void bitcoin_packet_getdata(const QByteArray&);
+	void bitcoin_packet_ping(const QByteArray&);
 
 	void newInventory(quint32, const QByteArray&);
+	void sendGetBlocks();
 
 protected:
 	void handleBuffer(const QByteArray&);
@@ -42,5 +44,7 @@ private:
 	void sendPacket(const QByteArray &type, const QByteArray &data);
 
 	QByteArray in_buf;
+
+	QTimer getblocks_timer;
 };
 

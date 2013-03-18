@@ -16,7 +16,7 @@
 #define SQL_BIND(_query, _var, _val) _query.bindValue(":" #_var, _val);
 #endif
 
-ModBitcoinConnector::ModBitcoinConnector(const QString &modname, const QString &instname): Daemon(modname, instname) {
+ModBitcoinConnector::ModBitcoinConnector(const QString &modname, const QString &instname): Daemon(modname, instname), db_lock(QMutex::Recursive) {
 	qDebug("ModBitcoinConnector: new instance");
 	db_open = false;
 	inventory_queue_timer.setSingleShot(false);
@@ -28,14 +28,55 @@ const QByteArray &ModBitcoinConnector::getClientId() const {
 	return client_id;
 }
 
-quint32 ModBitcoinConnector::getBlockHeight() const {
-	return 0;
+quint32 ModBitcoinConnector::getBlockHeight() {
+	// TODO store this value in cache for fast retriveral
+	db_lock.lock();
+	SQL_QUERY(query, "SELECT height FROM blocks ORDER BY height DESC LIMIT 1");
+	if (!query.exec()) {
+		db_lock.unlock();
+		return 0; // error
+	}
+	if (!query.next()) {
+		db_lock.unlock();
+		return 0; // wat?
+	}
+	int res = query.value(0).toInt();
+	db_lock.unlock();
+	return res;
+}
+
+BitcoinBlock ModBitcoinConnector::getLastBlock() {
+	db_lock.lock();
+	SQL_QUERY(query, "SELECT height, data FROM blocks ORDER BY height DESC LIMIT 1");
+	if (!query.exec()) {
+		db_lock.unlock();
+		return BitcoinBlock(); // error
+	}
+	if (!query.next()) {
+		db_lock.unlock();
+		return BitcoinBlock(); // wat?
+	}
+	quint32 height = query.value(0).toUInt();
+	QByteArray res = query.value(1).toByteArray();
+	db_lock.unlock();
+	return BitcoinBlock(res, height);
 }
 
 BitcoinBlock ModBitcoinConnector::getBlock(const QByteArray &hash) {
-	QByteArray data = getInventory(2, hash);
-	if (data.isEmpty()) return BitcoinBlock();
-	return BitcoinBlock(data);
+	db_lock.lock();
+	SQL_QUERY(query, "SELECT height, data FROM blocks WHERE hash = :hash");
+	SQL_BIND(query, hash, hash);
+	if (!query.exec()) {
+		db_lock.unlock();
+		return BitcoinBlock(); // error
+	}
+	if (!query.next()) {
+		db_lock.unlock();
+		return BitcoinBlock(); // wat?
+	}
+	int height = query.value(0).toInt();
+	QByteArray res = query.value(1).toByteArray();
+	return BitcoinBlock(res, height);
 }
 
 QByteArray ModBitcoinConnector::getInventory(quint32 type, const QByteArray &hash) {
@@ -47,7 +88,7 @@ QByteArray ModBitcoinConnector::getInventory(quint32 type, const QByteArray &has
 
 	if (type == 1) {
 		db_lock.lock();
-		SQL_QUERY(query, "SELECT data FROM tx_cache WHERE txid = :txid");
+		SQL_QUERY(query, "SELECT data FROM tx WHERE txid = :txid");
 		SQL_BIND(query, txid, hash);
 		if (!query.exec()) {
 			db_lock.unlock();
@@ -92,7 +133,7 @@ bool ModBitcoinConnector::knows(quint32 type, const QByteArray &hash) {
 
 	if (type == 1) {
 		db_lock.lock();
-		SQL_QUERY(query, "SELECT COUNT(*) FROM tx_cache WHERE txid = :txid");
+		SQL_QUERY(query, "SELECT COUNT(*) FROM tx WHERE txid = :txid");
 		SQL_BIND(query, txid, hash);
 		if (!query.exec()) {
 			db_lock.unlock();
@@ -136,7 +177,7 @@ void ModBitcoinConnector::addInventory(quint32 type, const QByteArray &hash, con
 
 	if (type == 1) {
 		db_lock.lock();
-		SQL_QUERY(query, "INSERT INTO tx_cache (txid, data) VALUES (:txid, :blob)");
+		SQL_QUERY(query, "INSERT INTO tx (txid, data) VALUES (:txid, :blob)");
 		SQL_BIND(query, txid, hash);
 		SQL_BIND(query, blob, data);
 		if (!query.exec())
@@ -160,21 +201,47 @@ void ModBitcoinConnector::addBlock(const BitcoinBlock&block) {
 	quint32 type = 2;
 	QByteArray hash = block.getHash();
 	QByteArray parent = block.getParent();
-	QByteArray raw = block.getRaw();
+	QByteArray raw = block.getRaw(); // only 80 bytes
 	QByteArray key;
+	QList<BitcoinTx> txs = block.getTransactions();
+
+	db_lock.lock();
+	db.transaction();
+
+	for(int i = 0; i < txs.size(); i++) {
+		if (!knows(1, txs[i].hash()))
+			addInventory(1, txs[i].hash(), txs[i].generate());
+
+		SQL_QUERY(query2, "INSERT INTO blocks_txs (block, tx, idx) VALUES (?,?,?)");
+		query2.addBindValue(hash);
+		query2.addBindValue(txs[i].hash());
+		query2.addBindValue(i);
+		if (!query2.exec()) {
+			qDebug("failed to exec blocks_txs query: %s", qPrintable(query2.lastError().text()));
+			db.rollback();
+			db_lock.unlock();
+			return;
+		}
+	}
+
 	QDataStream s(&key, QIODevice::WriteOnly); s.setByteOrder(QDataStream::LittleEndian); s << type;
 	key.append(hash);
 
 	inventory_cache.insert(key, new QByteArray(block.getRaw()));
 	inventory_queue.append(key);
 
-	db_lock.lock();
-	SQL_QUERY(query, "INSERT INTO blocks (hash, parent, data) VALUES (:hash, :parent, :blob)");
+	SQL_QUERY(query, "INSERT INTO blocks (hash, parent, height, data) VALUES (:hash, :parent, :height, :blob)");
 	SQL_BIND(query, hash, hash);
 	SQL_BIND(query, parent, parent);
+	SQL_BIND(query, height, block.getHeight());
 	SQL_BIND(query, blob, raw);
-	if (!query.exec())
+	if (!query.exec()) {
 		qDebug("failed to exec query: %s", qPrintable(query.lastError().text()));
+		db.rollback();
+		db_lock.unlock();
+		return;
+	}
+	db.commit();
 	db_lock.unlock();
 }
 
@@ -190,12 +257,21 @@ void ModBitcoinConnector::sendQueuedInventory() {
 void ModBitcoinConnector::doDatabaseInit() {
 	db_lock.lock();
 	// indexes we need:
-	// blockdepth=>block, addr=>tx_in, addr=>tx_out, parentblock=>block
-	db.exec("CREATE TABLE IF NOT EXISTS tx_cache (txid CHAR(64), data LONGBLOB)");
-	db.exec("CREATE UNIQUE INDEX IF NOT EXISTS tx_cache_txid ON tx_cache(txid)");
-	db.exec("CREATE TABLE IF NOT EXISTS blocks (hash CHAR(64), parent CHAR(64), data LONGBLOB)");
+	// [blockheight=>block], addr=>tx_in, addr=>tx_out, [parentblock=>block]
+	db.exec("PRAGMA synchronous = OFF");
+
+	db.exec("CREATE TABLE IF NOT EXISTS tx (txid CHAR(64), data LONGBLOB)");
+	db.exec("CREATE UNIQUE INDEX IF NOT EXISTS tx_txid ON tx(txid)");
+
+	db.exec("CREATE TABLE IF NOT EXISTS blocks (hash CHAR(64), parent CHAR(64), height INT, data LONGBLOB)");
 	db.exec("CREATE UNIQUE INDEX IF NOT EXISTS blocks_hash ON blocks(hash)");
 	db.exec("CREATE INDEX IF NOT EXISTS blocks_parent ON blocks(parent)");
+	db.exec("CREATE INDEX IF NOT EXISTS blocks_height ON blocks(height)");
+
+	db.exec("CREATE TABLE IF NOT EXISTS blocks_txs (block CHAR(64), tx CHAR(64), idx INT)");
+	db.exec("CREATE UNIQUE INDEX IF NOT EXISTS blocks_txs_full ON blocks_txs(block,idx)");
+	db.exec("CREATE INDEX IF NOT EXISTS blocks_txs_tx ON blocks_txs(tx)");
+	db.exec("CREATE INDEX IF NOT EXISTS blocks_txs_block ON blocks_txs(block)");
 	db_lock.unlock();
 }
 
@@ -236,8 +312,8 @@ void ModBitcoinConnector::reload() {
 	} else {
 		// random nodes
 //		conf_peers << "jun.dashjr.org:8333";
-//		conf_peers << "w003.mo.us.xta.net:8333";
-		conf_peers << "bitcoincharts.com:8333";
+		conf_peers << "w003.mo.us.xta.net:8333";
+//		conf_peers << "bitcoincharts.com:8333";
 	}
 
 	for(int i = 0; i < conf_peers.size(); i++) {
@@ -251,13 +327,6 @@ void ModBitcoinConnector::reload() {
 		QStringList tmp = conf_peers.at(i).split(":");
 		if (tmp.size() != 2) continue; // meh?
 		tmpsock->connectToHost(tmp.at(0), tmp.at(1).toInt());
-	}
-
-	// test
-	BitcoinBlock bl = getBlock(QByteArray::fromHex("22922243e158b2a6c5446ced748d4cfc279dc29d8f2e59fd6426423a03c5dea9"));
-	if (bl.isValid()) {
-		qDebug("VALID!");
-		qDebug("parent block: %s => %s", qPrintable(bl.getHash().toHex()), qPrintable(bl.getParent().toHex()));
 	}
 }
 

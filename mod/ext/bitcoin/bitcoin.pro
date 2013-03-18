@@ -13,5 +13,5 @@ CONFIG += crypto
 
 # Input
 SOURCES += BitcoinNetAddr.cpp BitcoinCrypto.cpp BitcoinStream.cpp
-SOURCES += BitcoinBlock.cpp
+SOURCES += BitcoinBlock.cpp BitcoinTx.cpp
 #HEADERS += 

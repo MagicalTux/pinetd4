@@ -15,7 +15,7 @@ class ModBitcoinConnector: public Daemon {
 public:
 	ModBitcoinConnector(const QString &modname, const QString &instname);
 	const QByteArray &getClientId() const;
-	quint32 getBlockHeight() const;
+	quint32 getBlockHeight();
 
 	void registerNonce(const QByteArray&);
 	void unregisterNonce(const QByteArray&);
@@ -27,6 +27,7 @@ public:
 	QByteArray getInventory(quint32 type, const QByteArray &hash);
 
 	BitcoinBlock getBlock(const QByteArray &hash);
+	BitcoinBlock getLastBlock();
 
 signals:
 	void newInventory(quint32 count, const QByteArray &);

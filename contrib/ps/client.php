@@ -14,7 +14,7 @@ function pkt_ping() {
 fwrite($sock, pkt_ping());
 
 // subscribe to channel too
-$channel = 'dbf1dee9-4f2e-4a08-8cb7-748919a71b21';
+$channel = '85174711-be64-4de1-b783-0628995d7914';
 $packet = chr(0x81).pack('H*', str_replace('-', '', $channel)); // 0x81 = subscribe
 $packet = pack('n', strlen($packet)).$packet;
 fwrite($sock, $packet);
@@ -26,7 +26,7 @@ while(true) {
 	if ($tmp === false) break;
 	if ($tmp === '') {
 		// try to do a new ping
-		fwrite($sock, pkt_ping());
+		if (!fwrite($sock, pkt_ping())) die();
 		continue;
 	}
 	$buf .= $tmp;
