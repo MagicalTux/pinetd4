@@ -105,7 +105,7 @@ void ModBitcoinConnectorClient::bitcoin_packet_block(const QByteArray&block) {
 		return;
 	}
 	if (pbl.isValid()) bl.setHeight(pbl.getHeight() + 1);
-	qDebug("Storing block %s", qPrintable(bl.getHexHash()));
+	qDebug("Storing block %s %d", qPrintable(bl.getHexHash()), bl.getHeight());
 	if (parent->knows(2, bl.getHash())) return; // already know this one
 	parent->addBlock(bl);
 

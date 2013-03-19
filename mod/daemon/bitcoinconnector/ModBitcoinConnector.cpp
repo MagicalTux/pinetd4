@@ -166,14 +166,15 @@ bool ModBitcoinConnector::knows(quint32 type, const QByteArray &hash) {
 	return false; // wtf?
 }
 
-void ModBitcoinConnector::addInventory(quint32 type, const QByteArray &hash, const QByteArray &data) {
+void ModBitcoinConnector::addInventory(quint32 type, const QByteArray &hash, const QByteArray &data, bool send_inv) {
 	QByteArray key;
 	QDataStream s(&key, QIODevice::WriteOnly); s.setByteOrder(QDataStream::LittleEndian); s << type;
 	key.append(hash);
 
 //	qDebug("ModBitcoinConnector: recording %d:%s", type, qPrintable(hash.toHex()));
 	inventory_cache.insert(key, new QByteArray(data));
-	inventory_queue.append(key);
+	if (send_inv)
+		inventory_queue.append(key);
 
 	if (type == 1) {
 		db_lock.lock();
@@ -205,7 +206,7 @@ void ModBitcoinConnector::addBlock(const BitcoinBlock&block) {
 
 	for(int i = 0; i < txs.size(); i++) {
 		if (!knows(1, txs[i].hash()))
-			addInventory(1, txs[i].hash(), txs[i].generate());
+			addInventory(1, txs[i].hash(), txs[i].generate(), false);
 
 		SQL_QUERY(query2, "INSERT INTO blocks_txs (block, tx, idx) VALUES (?,?,?)");
 		query2.addBindValue(hash);
