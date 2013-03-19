@@ -9,6 +9,7 @@
 class QTcpSocket;
 class ModBitcoinConnectorClient;
 class BitcoinBlock;
+class BitcoinNetAddr;
 
 class ModBitcoinConnector: public Daemon {
 	Q_OBJECT;
@@ -19,6 +20,7 @@ public:
 
 	void registerNonce(const QByteArray&);
 	void unregisterNonce(const QByteArray&);
+	void unregisterPeer(const QString&);
 	bool knownNonce(const QByteArray&);
 
 	bool knows(quint32 type, const QByteArray &hash);
@@ -28,6 +30,9 @@ public:
 
 	BitcoinBlock getBlock(const QByteArray &hash);
 	BitcoinBlock getLastBlock();
+
+	void registerPeer(const BitcoinNetAddr &, quint32 stamp);
+	void registerPeer(const QString &key, quint64 services, quint32 stamp);
 
 signals:
 	void newInventory(quint32 count, const QByteArray &);

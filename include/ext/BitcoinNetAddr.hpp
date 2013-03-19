@@ -6,6 +6,7 @@ public:
 	BitcoinNetAddr(const QHostAddress &, quint16, quint64 services = 0);
 	BitcoinNetAddr(const QByteArray&);
 
+	QString getKey() const;
 	const QByteArray &getBin() const;
 	const QHostAddress &getAddr() const;
 	quint16 getPort() const;

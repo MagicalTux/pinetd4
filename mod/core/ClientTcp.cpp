@@ -5,19 +5,25 @@ ClientTcp::ClientTcp(QTcpSocket *_sock, Daemon *_parent): Client(_parent) {
 	sock = _sock;
 	connect(sock, SIGNAL(readyRead()), this, SLOT(doRead()));
 	connect(sock, SIGNAL(destroyed(QObject*)), this, SLOT(deleteLater()));
-	connect(sock, SIGNAL(disconnected()), this, SLOT(deleteLater()));
+	connect(sock, SIGNAL(disconnected()), this, SLOT(socketDisconnected()));
 	connect(sock, SIGNAL(bytesWritten(qint64)), this, SLOT(bytesWritten(qint64)));
 	connect(this, SIGNAL(destroyed(QObject*)), sock, SLOT(deleteLater()));
 }
 
+void ClientTcp::socketDisconnected() {
+	qDebug("ClientTcp: disconnected by peer");
+	deleteLater();
+}
+
 void ClientTcp::doRead() {
 	qint64 to_read = sock->bytesAvailable();
-	if (to_read > 1024*1024) to_read = 1024*1024; // limit to 1MB per read
+	if (to_read > 10*1024*1024) to_read = 10*1024*1024; // limit to 10MB per read
 	QByteArray buf(to_read, '\0');
 	qint64 dat = sock->read(buf.data(), buf.size());
 	if (dat == 0) return; // no data, actually (should it happen?)
 	if (dat == -1) {
 		// some kind of error
+		qDebug("ClientTcp: failure to read data, closing socket");
 		sock->close();
 		deleteLater();
 		return;

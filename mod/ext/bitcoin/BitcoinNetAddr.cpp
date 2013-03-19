@@ -32,6 +32,12 @@ bool BitcoinNetAddr::isValid() const {
 	return is_valid;
 }
 
+QString BitcoinNetAddr::getKey() const {
+	if (!is_valid) return QString();
+	// return addr/port because easier to parse than ipv4:port + [ipv6]:port
+	return addr.toString()+"/"+QString::number(port);
+}
+
 const QByteArray &BitcoinNetAddr::getBin() const {
 	if (!is_valid) {
 		static QByteArray null_addr(26,'\0');
@@ -72,6 +78,7 @@ void BitcoinNetAddr::decode_bin() {
 			bin_r >> ipv6[i];
 		addr.setAddress(ipv6);
 	}
+	bin_r.setByteOrder(QDataStream::BigEndian);
 	bin_r >> port;
 	is_valid = true;
 }

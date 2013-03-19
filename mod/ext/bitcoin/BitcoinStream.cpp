@@ -5,6 +5,10 @@ void BitcoinStream::writeAddress(QDataStream &stream, const BitcoinNetAddr &addr
 	writeData(stream, addr.getBin());
 }
 
+BitcoinNetAddr BitcoinStream::readAddress(QDataStream &stream) {
+	return BitcoinNetAddr(readData(stream, 26));
+}
+
 void BitcoinStream::writeString(QDataStream &stream, const QByteArray &string) {
 	writeInt(stream, string.length());
 	writeData(stream, string);

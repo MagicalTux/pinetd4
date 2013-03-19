@@ -10,6 +10,7 @@ public:
 public slots:
 	void doRead();
 	void bytesWritten(qint64);
+	void socketDisconnected();
 
 protected:
 	QTcpSocket *sock;

@@ -9,6 +9,7 @@ Client::Client(Daemon *_parent): QObject(_parent) {
 
 Client::~Client() {
 	// bye bye
+	qDebug("client dies");
 }
 
 const QString &Client::getId() const {

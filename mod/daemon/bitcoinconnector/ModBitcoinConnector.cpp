@@ -250,6 +250,15 @@ void ModBitcoinConnector::sendQueuedInventory() {
 	inventory_queue.clear();
 }
 
+void ModBitcoinConnector::registerPeer(const BitcoinNetAddr &a, quint32 stamp) {
+	registerPeer(a.getKey(), a.getServices(), stamp);
+}
+
+void ModBitcoinConnector::registerPeer(const QString &key, quint64 services, quint32 stamp) {
+	if (stamp > time(NULL)) stamp = time(NULL);
+	qDebug("got peer: %s %lu %u", qPrintable(key), services, stamp);
+}
+
 void ModBitcoinConnector::doDatabaseInit() {
 	db_lock.lock();
 	// indexes we need:
@@ -259,15 +268,19 @@ void ModBitcoinConnector::doDatabaseInit() {
 	db.exec("CREATE TABLE IF NOT EXISTS tx (txid CHAR(64), data LONGBLOB)");
 	db.exec("CREATE UNIQUE INDEX IF NOT EXISTS tx_txid ON tx(txid)");
 
-	db.exec("CREATE TABLE IF NOT EXISTS blocks (hash CHAR(64), parent CHAR(64), height INT, data LONGBLOB)");
+	db.exec("CREATE TABLE IF NOT EXISTS blocks (hash BINARY(32), parent BINARY(32), height INT, data LONGBLOB)");
 	db.exec("CREATE UNIQUE INDEX IF NOT EXISTS blocks_hash ON blocks(hash)");
 	db.exec("CREATE INDEX IF NOT EXISTS blocks_parent ON blocks(parent)");
 	db.exec("CREATE INDEX IF NOT EXISTS blocks_height ON blocks(height)");
 
-	db.exec("CREATE TABLE IF NOT EXISTS blocks_txs (block CHAR(64), tx CHAR(64), idx INT)");
+	db.exec("CREATE TABLE IF NOT EXISTS blocks_txs (block BINARY(32), tx BINARY(32), idx INT)");
 	db.exec("CREATE UNIQUE INDEX IF NOT EXISTS blocks_txs_full ON blocks_txs(block,idx)");
 	db.exec("CREATE INDEX IF NOT EXISTS blocks_txs_tx ON blocks_txs(tx)");
 	db.exec("CREATE INDEX IF NOT EXISTS blocks_txs_block ON blocks_txs(block)");
+
+	db.exec("CREATE TABLE IF NOT EXISTS peer (key VARCHAR(45), stamp BIGINT, services BIGINT, version LONGBLOB)");
+	db.exec("CREATE UNIQUE INDEX IF NOT EXISTS peer_key ON peer(key)");
+
 	db_lock.unlock();
 }
 
@@ -307,9 +320,9 @@ void ModBitcoinConnector::reload() {
 		conf_peers = conf.value("peer_seed").toStringList();
 	} else {
 		// random nodes
-		conf_peers << "jun.dashjr.org:8333";
-//		conf_peers << "w003.mo.us.xta.net:8333";
-//		conf_peers << "bitcoincharts.com:8333";
+		conf_peers << "jun.dashjr.org/8333";
+		conf_peers << "w003.mo.us.xta.net/8333";
+		conf_peers << "bitcoincharts.com/8333";
 	}
 
 	for(int i = 0; i < conf_peers.size(); i++) {
@@ -320,14 +333,19 @@ void ModBitcoinConnector::reload() {
 		tmp_cnx.append(tmpsock);
 		connect(tmpsock, SIGNAL(connected()), this, SLOT(outgoingTcp()));
 
-		QStringList tmp = conf_peers.at(i).split(":");
+		QStringList tmp = conf_peers.at(i).split("/");
 		if (tmp.size() != 2) continue; // meh?
 		tmpsock->connectToHost(tmp.at(0), tmp.at(1).toInt());
 	}
 }
 
+void ModBitcoinConnector::unregisterPeer(const QString&s) {
+	peers.remove(s);
+}
+
 void ModBitcoinConnector::clientInit(ModBitcoinConnectorClient*n) {
 	connect(this, SIGNAL(newInventory(quint32,const QByteArray&)), n, SLOT(newInventory(quint32,const QByteArray&)));
+	peers.insert(n->getKey(), n);
 }
 
 void ModBitcoinConnector::outgoingTcp() {
@@ -336,6 +354,7 @@ void ModBitcoinConnector::outgoingTcp() {
 	ModBitcoinConnectorClient *n = new ModBitcoinConnectorClient(s, this);
 	clientInit(n);
 	clientAdd(n);
+	n->setOutgoing(true);
 	n->sendVersion();
 }
 

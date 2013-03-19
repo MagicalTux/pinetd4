@@ -12,5 +12,6 @@ public:
 	static quint64 readInt(QDataStream &stream);
 	static QByteArray readString(QDataStream &stream);
 	static QByteArray readData(QDataStream &stream, int len);
+	static BitcoinNetAddr readAddress(QDataStream &stream);
 };
 
