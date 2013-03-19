@@ -306,8 +306,8 @@ void ModBitcoinConnector::reload() {
 		conf_peers = conf.value("peer_seed").toStringList();
 	} else {
 		// random nodes
-//		conf_peers << "jun.dashjr.org:8333";
-		conf_peers << "w003.mo.us.xta.net:8333";
+		conf_peers << "jun.dashjr.org:8333";
+//		conf_peers << "w003.mo.us.xta.net:8333";
 //		conf_peers << "bitcoincharts.com:8333";
 	}
 

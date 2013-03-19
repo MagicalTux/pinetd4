@@ -48,10 +48,6 @@ void ModBitcoinConnectorClient::sendGetBlocks() {
 	if (getblocks_timer.interval() != 300000) {
 		getblocks_timer.setInterval(300000);
 	}
-	QByteArray pkt;
-	QDataStream pkt_w(&pkt, QIODevice::WriteOnly);
-	pkt_w.setByteOrder(QDataStream::LittleEndian);
-	pkt_w << (quint32)1;
 	BitcoinBlock bl = parent->getLastBlock();
 	if (!bl.isValid()) {
 		// ok, we don't even have the original block, that's bad
@@ -68,10 +64,29 @@ void ModBitcoinConnectorClient::sendGetBlocks() {
 		return;
 //		BitcoinStream::writeInt(pkt_w, 1);
 //		BitcoinStream::writeData(pkt_w, QByteArray(32, '\0'));
-	} else {
-		BitcoinStream::writeInt(pkt_w, 1);
-		BitcoinStream::writeData(pkt_w, bl.getHash());
 	}
+
+	QByteArray pkt;
+	QDataStream pkt_w(&pkt, QIODevice::WriteOnly);
+	pkt_w.setByteOrder(QDataStream::LittleEndian);
+	pkt_w << (quint32)1;
+
+	QList<QByteArray> info;
+	BitcoinBlock cur = bl;
+	info.append(bl.getHash());
+	for(int i = 0; i < 8; i++) {
+		for(int j = 0; j < i; j++) {
+			QByteArray p = cur.getParent();
+			if (p == QByteArray(32,'\0')) break;
+			cur = parent->getBlock(p);
+		}
+		info.append(cur.getHash());
+		if (cur.getParent() == QByteArray(32,'\0')) break;
+	}
+	BitcoinStream::writeInt(pkt_w, info.length());
+	for(int i = 0; i < info.length(); i++)
+		BitcoinStream::writeData(pkt_w, info.at(i));
+
 	BitcoinStream::writeData(pkt_w, QByteArray(32, '\0'));
 	qDebug("sending getblocks(%s)", qPrintable(pkt.toHex()));
 	sendPacket("getblocks", pkt);
@@ -215,7 +230,7 @@ void ModBitcoinConnectorClient::bitcoin_packet_version(const QByteArray&pkt) {
 void ModBitcoinConnectorClient::bitcoin_packet_verack(const QByteArray&) {
 	// no need to keep that nonce anymore
 	parent->unregisterNonce(bitcoin_nonce);
-	sendGetBlocks();
+	getblocks_timer.start(5000);
 }
 
 void ModBitcoinConnectorClient::handleBuffer(const QByteArray &data) {
