@@ -22,7 +22,7 @@ public:
 	bool knownNonce(const QByteArray&);
 
 	bool knows(quint32 type, const QByteArray &hash);
-	void addInventory(quint32 type, const QByteArray &hash, const QByteArray &data);
+	void addInventory(quint32 type, const QByteArray &hash, const QByteArray &data, bool send_inv = true);
 	void addBlock(const BitcoinBlock&);
 	QByteArray getInventory(quint32 type, const QByteArray &hash);
 
