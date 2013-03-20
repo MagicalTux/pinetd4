@@ -126,13 +126,15 @@ void ModBitcoinConnectorClient::bitcoin_packet_block(const QByteArray&block) {
 			parent->addBlock(bl);
 	}
 
-	if (block_todl_list.size() > 0) {
+	while(block_todl_list.size() > 0) {
+		QByteArray blid = block_todl_list.takeFirst();
+		if (parent->knows(2, blid)) continue;
 		QByteArray buf;
 		QDataStream buf_w(&buf, QIODevice::WriteOnly);
 		buf_w.setByteOrder(QDataStream::LittleEndian);
 		BitcoinStream::writeInt(buf_w, 1);
 		buf_w << (quint32)2;
-		BitcoinStream::writeData(buf_w, block_todl_list.takeFirst());
+		BitcoinStream::writeData(buf_w, blid);
 //		qDebug("ModBitcoinConnectorClient::bitcoin_packet_block: sending getdata(%s)", qPrintable(buf.toHex()));
 		sendPacket("getdata", buf);
 		return;
