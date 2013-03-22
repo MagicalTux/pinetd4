@@ -45,12 +45,18 @@ void ModPS::reload() {
 }
 
 void ModPS::checkMasters() {
+	qulonglong now = time(NULL);
+
 	for(auto i = masters.begin(); i != masters.end(); i++) {
 		if (i.value() == NULL) {
 			i.value() = new QTcpSocket(this);
 			connect(i.value(), SIGNAL(readyRead()), this, SLOT(readFromMaster()));
 			connect(i.value(), SIGNAL(connected()), this, SLOT(masterConnected()));
+			i.value()->setProperty("stamp", now);
 		}
+
+		if (i.value()->property("stamp").toULongLong() < (now-120))
+			i.value()->disconnect();
 
 		if (i.value()->state() == QAbstractSocket::UnconnectedState) {
 			QStringList tmp = i.key().split(":");
@@ -58,12 +64,20 @@ void ModPS::checkMasters() {
 			qDebug("ModPS: connecting to master %s", qPrintable(i.key()));
 			i.value()->connectToHost(tmp.at(0), tmp.at(1).toInt());
 		}
+
+		// send a ping to the master
+		if (i.value()->state() == QAbstractSocket::ConnectedState) {
+			QByteArray ping("\x00\x19\x80\x50\x49\x4e\x47\x5f\x54\x43\x50\x5f\x52\x45\x51\x55\x45\x53\x54\x5f\x50\x49\x4e\x45\x54\x44\x34", 27);
+			i.value()->write(ping);
+		}
 	}
 }
 
 void ModPS::readFromMaster() {
 	QTcpSocket *s = qobject_cast<QTcpSocket*>(sender());
 	if (s == NULL) return;
+
+	s->setProperty("stamp", (qulonglong)time(NULL));
 
 	while(true) {
 		if (s->bytesAvailable() < 2) return; // not enough
@@ -123,6 +137,8 @@ void ModPS::pushPacket(const QByteArray &dat) {
 	}
 	int type = (unsigned char)dat[2];
 	QByteArray channel = dat.mid(3,16);
+
+	if (type == 0x80) return; // ping reply, ignore safely
 
 	if (type & 0x80) {
 		qDebug("ModPS::pushPacket: dropping control packet");
