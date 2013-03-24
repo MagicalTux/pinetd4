@@ -60,7 +60,7 @@ QStringList VServ::cmdLine() const {
 	res << "-mon" << "chardev=charmonitor,id=monitor,mode=control";
 
 	if (config.contains("rtc_base"))
-		res << "-rtc" << "base=" << config.value("rtc_base");
+		res << "-rtc" << "base=" + config.value("rtc_base");
 
 	for(int i = 0; config.contains("device"+QString::number(i)); i++) {
 		QStringList devinfotmp = config.value("device"+QString::number(i)).split("|");
