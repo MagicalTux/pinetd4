@@ -98,3 +98,16 @@ void BitcoinTxScript::generate(QDataStream&stream) const {
 	BitcoinStream::writeString(stream, script);
 }
 
+QByteArray BitcoinTxScript::getTxOutAddr() const {
+	// if this is a txout, we can get the addr easily
+	// format is: 76a910 x 88ac (x being 16 bytes of addr data)
+	// OP_DUP OP_HASH160 de26002a186c381cdf320c7ae21e43f99c2a8296 OP_EQUALVERIFY OP_CHECKSIG
+	// OP_DUP = 0x76 OP_HASH160 = 0xa9 (16bytes string literal = 0x10+string) OP_EQUALVERIFY = 0x88 OP_CHECKSIG = 0xac
+	// total length: 16+3+2 = 21
+	// if format is not valid, return an empty QByteArray()
+	if (script.length() != 21) return QByteArray();
+	if (script.left(3) != QByteArray("\x76\xa9\x10", 3)) return QByteArray();
+	if (script.right(2) != QByteArray("\x88\xac", 2)) return QByteArray();
+	return script.mid(3,16);
+}
+

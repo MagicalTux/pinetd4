@@ -1,6 +1,7 @@
 <?php
 
-$sock = fsockopen('54.249.253.138', 65000);
+$sock = fsockopen('54.241.15.136', 65000); // US.CA
+//$sock = fsockopen('54.249.253.138', 65000); // JAPAN
 if (!$sock) die();
 
 
@@ -14,7 +15,8 @@ function pkt_ping() {
 fwrite($sock, pkt_ping());
 
 // subscribe to channel too
-$channel = '85174711-be64-4de1-b783-0628995d7914';
+//$channel = '85174711-be64-4de1-b783-0628995d7914'; // lag
+$channel = '829c2676-c542-4b5c-aec2-36d6e5fb5272';
 $packet = chr(0x81).pack('H*', str_replace('-', '', $channel)); // 0x81 = subscribe
 $packet = pack('n', strlen($packet)).$packet;
 fwrite($sock, $packet);

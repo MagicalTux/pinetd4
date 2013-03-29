@@ -6,6 +6,7 @@ public:
 	BitcoinTxScript();
 	BitcoinTxScript(const QByteArray&);
 	void generate(QDataStream&) const;
+	QByteArray getTxOutAddr() const;
 private:
 	QByteArray script;
 };

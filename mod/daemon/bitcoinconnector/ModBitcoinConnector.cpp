@@ -281,6 +281,13 @@ void ModBitcoinConnector::doDatabaseInit() {
 	db.exec("CREATE TABLE IF NOT EXISTS peer (key VARCHAR(45), stamp BIGINT, services BIGINT, version LONGBLOB)");
 	db.exec("CREATE UNIQUE INDEX IF NOT EXISTS peer_key ON peer(key)");
 
+	db.exec("CREATE TABLE IF NOT EXISTS addr (addr BINARY(16), txout BINARY(32), txout_n INT)");
+	db.exec("CREATE UNIQUE INDEX IF NOT EXISTS addr_all ON addr(addr,txout,txout_n)");
+
+	// link table txout => txin (also if has entry to confirmed tx = claimed output)
+	db.exec("CREATE TABLE IF NOT EXISTS txout_txin(txout BINARY(32), txout_n INT, txin BINARY(32), txin_n INT)");
+	db.exec("CREATE UNIQUE INDEX IF NOT EXISTS txout_txin_all ON txout_txin(txout, txout_n, txin, txin_n)");
+
 	db_lock.unlock();
 }
 
