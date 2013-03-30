@@ -19,6 +19,14 @@ void ModPS::reload() {
 	if (conf.contains("master"))
 		conf_masters = conf.value("master").toStringList();
 
+	subscribe_limit.clear();
+	if (conf.contains("subscribe_limit")) {
+		QStringList tmp = conf.value("subscribe_limit").toStringList();
+		for(int i = 0; i < tmp.length(); i++) {
+			subscribe_limit.insert(QByteArray::fromHex(tmp.at(i).toAscii().replace("-", "")));
+		}
+	}
+
 	// make list of current masters
 	QSet<QString> cur_masters;
 
@@ -97,6 +105,12 @@ void ModPS::masterConnected() {
 	packet[2] = 0x81; // subscribe
 	for(auto i = channel_refcount.constBegin(); i != channel_refcount.constEnd(); i++)
 		s->write(packet+i.key());
+}
+
+bool ModPS::canSubscribe(const QByteArray &channel) {
+	if (subscribe_limit.isEmpty()) return true;
+	if (subscribe_limit.contains(channel)) return true;
+	return false;
 }
 
 void ModPS::doSubscribe(const QByteArray &channel) {

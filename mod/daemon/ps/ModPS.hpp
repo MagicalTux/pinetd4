@@ -1,6 +1,7 @@
 #include <core/Daemon.hpp>
 #include <QMutex>
 #include <QTimer>
+#include <QSet>
 
 class DatagramReply;
 
@@ -11,6 +12,7 @@ public:
 
 	void channelAddRef(const QByteArray &channel);
 	void channelDelRef(const QByteArray &channel);
+	bool canSubscribe(const QByteArray &channel);
 
 signals:
 	void channelPacket(const QByteArray &dat, const QByteArray &chan, int type);
@@ -32,5 +34,6 @@ private:
 	QMutex channel_refcount_lock;
 	QMap<QString,QTcpSocket*> masters;
 	QTimer masters_check;
+	QSet<QByteArray> subscribe_limit;
 };
 

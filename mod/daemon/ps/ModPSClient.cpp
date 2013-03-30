@@ -45,6 +45,11 @@ void ModPSClient::handlePacket(const QByteArray &packet) {
 
 void ModPSClient::handleSubscribe(const QByteArray &channel) {
 	if (channels.contains(channel)) return;
+	if (!parent->canSubscribe(channel)) {
+		sock->close();
+		deleteLater();
+		return;
+	}
 //	qDebug("ModPSClient::handleSubscribe: client subscribes to channel %s", qPrintable(channel.toHex()));
 	channels.insert(channel);
 	parent->channelAddRef(channel);
