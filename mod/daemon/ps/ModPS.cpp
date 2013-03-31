@@ -9,7 +9,7 @@ ModPS::ModPS(const QString &modname, const QString &instname): Daemon(modname, i
 //	qDebug("ModPS: new instance");
 	connect(&masters_check, SIGNAL(timeout()), this, SLOT(checkMasters()));
 	masters_check.setSingleShot(false);
-	masters_check.start(60000);
+	masters_check.start(10000);
 }
 
 void ModPS::reload() {
@@ -63,14 +63,23 @@ void ModPS::checkMasters() {
 			i.value()->setProperty("stamp", now);
 		}
 
-		if (i.value()->property("stamp").toULongLong() < (now-120))
-			i.value()->disconnect();
+		if (i.value()->property("stamp").toULongLong() < (now-60)) {
+			i.value()->abort();
+		}
 
-		if (i.value()->state() == QAbstractSocket::UnconnectedState) {
-			QStringList tmp = i.key().split(":");
-			if (tmp.size() != 2) break; // can't help it
-			qDebug("ModPS: connecting to master %s", qPrintable(i.key()));
-			i.value()->connectToHost(tmp.at(0), tmp.at(1).toInt());
+		switch(i.value()->state()) {
+			case QAbstractSocket::HostLookupState:
+			case QAbstractSocket::ConnectingState:
+			case QAbstractSocket::ConnectedState:
+				break;
+			default:
+			{
+				i.value()->setProperty("stamp", (qulonglong)time(NULL));
+				QStringList tmp = i.key().split(":");
+				if (tmp.size() != 2) break; // can't help it
+				qDebug("ModPS: connecting to master %s", qPrintable(i.key()));
+				i.value()->connectToHost(tmp.at(0), tmp.at(1).toInt());
+			}
 		}
 
 		// send a ping to the master
