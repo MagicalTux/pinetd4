@@ -8,7 +8,7 @@ http://www.pinetd.com
 
 ## Requirements
 
-* Qt 4.8 or newer
+* Qt 4.8 or newer (5.0 or newer for Elastic Search ext)
 * QCA
 * qca-ossl
 
