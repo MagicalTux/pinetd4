@@ -1,5 +1,5 @@
 TEMPLATE = subdirs
-SUBDIRS = tcpline bitcoin
+SUBDIRS = tcpline
 contains(QT_VERSION, ^5.*) {
-	SUBDIRS += elasticsearch
+	SUBDIRS += bitcoin elasticsearch
 }

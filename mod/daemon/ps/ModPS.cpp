@@ -23,7 +23,7 @@ void ModPS::reload() {
 	if (conf.contains("subscribe_limit")) {
 		QStringList tmp = conf.value("subscribe_limit").toStringList();
 		for(int i = 0; i < tmp.length(); i++) {
-			subscribe_limit.insert(QByteArray::fromHex(tmp.at(i).toAscii().replace("-", "")));
+			subscribe_limit.insert(QByteArray::fromHex(tmp.at(i).toLatin1().replace("-", "")));
 		}
 	}
 
