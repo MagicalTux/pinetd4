@@ -17,6 +17,7 @@ ModMidasInput::ModMidasInput(const QString &modname, const QString &instname): D
 }
 
 void ModMidasInput::mq_declared() {
+	qDebug("ModMidasInput: Queue ready, configuring exchange");
 	mq_queue->setQOS(0,1);
 	mq_queue->consume();
 	// start exchange declaration
@@ -25,6 +26,7 @@ void ModMidasInput::mq_declared() {
 }
 
 void ModMidasInput::mq_e_declared() {
+	qDebug("ModMidasInput: Exchange ready, binding...");
 	mq_exchange->bind(mq_queue);
 }
 
