@@ -1,5 +1,7 @@
 #include "ModMidasInput.hpp"
 #include <QDateTime>
+#include <ext/qamqp/amqp.h>
+#include <ext/qamqp/amqp_queue.h>
 
 ModMidasInput::ModMidasInput(const QString &modname, const QString &instname): Daemon(modname, instname) {
 	qDebug("ModMidasInput: initialize new file and checkpoint");

@@ -15,17 +15,17 @@ CONFIG += plugin
 HEADERS += ../../../include/ext/qamqp/amqp.h \
            ../../../include/ext/qamqp/amqp_authenticator.h \
            ../../../include/ext/qamqp/amqp_channel.h \
-           amqp_channel_p.h \
+           ../../../include/ext/qamqp/amqp_channel_p.h \
            ../../../include/ext/qamqp/amqp_connection.h \
-           amqp_connection_p.h \
+           ../../../include/ext/qamqp/amqp_connection_p.h \
            ../../../include/ext/qamqp/amqp_exchange.h \
-           amqp_exchange_p.h \
+           ../../../include/ext/qamqp/amqp_exchange_p.h \
            ../../../include/ext/qamqp/amqp_frame.h \
            ../../../include/ext/qamqp/amqp_message.h \
            ../../../include/ext/qamqp/amqp_network.h \
-           amqp_p.h \
+           ../../../include/ext/qamqp/amqp_p.h \
            ../../../include/ext/qamqp/amqp_queue.h \
-           amqp_queue_p.h \
+           ../../../include/ext/qamqp/amqp_queue_p.h \
            ../../../include/ext/qamqp/amqp_global.h \
 
 SOURCES += amqp.cpp \
