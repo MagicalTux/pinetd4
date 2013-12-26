@@ -1,13 +1,40 @@
 #include "ModMidasInput.hpp"
 #include <QDateTime>
-#include <ext/qamqp/amqp.h>
-#include <ext/qamqp/amqp_queue.h>
 
 ModMidasInput::ModMidasInput(const QString &modname, const QString &instname): Daemon(modname, instname) {
-	qDebug("ModMidasInput: initialize new file and checkpoint");
-	
+	qDebug("ModMidasInput: initialize new file and checkpoint, and MQ connection");
+
+	QAMQP::Client *client = new QAMQP::Client(this);
+	client->open(QUrl("qamqp://guest:guest@localhost/"));
+	mq_queue = client->createQueue();
+	mq_queue->declare("midas1", QAMQP::Queue::Durable);
+	mq_exchange = client->createExchange("midas");
+	connect(mq_queue, SIGNAL(declared()), this, SLOT(mq_declared()));
+	connect(mq_queue, SIGNAL(messageReceived(QAMQP::Queue*)), this, SLOT(mq_messageReceived(QAMQP::Queue*)));
+
 	output = NULL;
 	switchOutput();
+}
+
+void ModMidasInput::mq_declared() {
+	mq_queue->setQOS(0,1);
+	mq_queue->consume();
+	// start exchange declaration
+	connect(mq_exchange, SIGNAL(declared()), this, SLOT(mq_e_declared()));
+	mq_exchange->declare("fanout", QAMQP::Exchange::Durable);
+}
+
+void ModMidasInput::mq_e_declared() {
+	mq_exchange->bind(mq_queue);
+}
+
+void ModMidasInput::mq_messageReceived(QAMQP::Queue*q) {
+	QAMQP::MessagePtr message = q->getMessage();
+
+	output->write(message->payload);
+	output->flush();
+
+	q->ack(message);
 }
 
 void ModMidasInput::switchOutput() {
