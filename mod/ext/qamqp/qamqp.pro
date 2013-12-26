@@ -2,7 +2,7 @@ TEMPLATE = lib
 CONFIG += shared
 TARGET = ../qamqp
 DEPENDPATH += .
-INCLUDEPATH += . ../../../include ../../../include/ext
+INCLUDEPATH += . ../../../include ../../../include/ext/qamqp
 
 QT -= gui
 QT += network
@@ -12,21 +12,21 @@ CONFIG += plugin
 
 # Input
 
-HEADERS += ../../../include/ext/amqp.h \
-           ../../../include/ext/amqp_authenticator.h \
-           ../../../include/ext/amqp_channel.h \
+HEADERS += ../../../include/ext/qamqp/amqp.h \
+           ../../../include/ext/qamqp/amqp_authenticator.h \
+           ../../../include/ext/qamqp/amqp_channel.h \
            amqp_channel_p.h \
-           ../../../include/ext/amqp_connection.h \
+           ../../../include/ext/qamqp/amqp_connection.h \
            amqp_connection_p.h \
-           ../../../include/ext/amqp_exchange.h \
+           ../../../include/ext/qamqp/amqp_exchange.h \
            amqp_exchange_p.h \
-           ../../../include/ext/amqp_frame.h \
-           ../../../include/ext/amqp_message.h \
-           ../../../include/ext/amqp_network.h \
+           ../../../include/ext/qamqp/amqp_frame.h \
+           ../../../include/ext/qamqp/amqp_message.h \
+           ../../../include/ext/qamqp/amqp_network.h \
            amqp_p.h \
-           ../../../include/ext/amqp_queue.h \
+           ../../../include/ext/qamqp/amqp_queue.h \
            amqp_queue_p.h \
-           ../../../include/ext/amqp_global.h \
+           ../../../include/ext/qamqp/amqp_global.h \
 
 SOURCES += amqp.cpp \
            amqp_authenticator.cpp \
