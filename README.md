@@ -14,7 +14,7 @@ http://www.pinetd.com
 
 Compiling is easy.
 
-	qmake
+	qmake (or /usr/lib64/qt5/bin/qmake if overlay)
 	make
 
 # History
