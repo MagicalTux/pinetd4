@@ -10,6 +10,15 @@ http://www.pinetd.com
 
 * Qt 4.8 or newer (5.0 or newer for Bitcoin and Elastic Search ext)
 
+### Installing Qt 5 on Gentoo (layman)
+
+Do the following:
+
+	emerge -q layman
+	layman -f -a qt
+	echo 'source /var/lib/layman/make.conf' >>/etc/portage/make.conf
+	emerge -avq qtcore:5 qtdbus:5 qtnetwork:5 qtscript:5 qtsql:5 qtxml:5
+
 ## Compilation
 
 Compiling is easy.

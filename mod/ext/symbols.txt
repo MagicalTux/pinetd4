@@ -13,6 +13,8 @@ ext/bitcoin _ZN12BitcoinBlockC2ERK10QByteArrayj BitcoinBlock::BitcoinBlock(QByte
 ext/bitcoin _ZN12BitcoinBlockC2Ev BitcoinBlock::BitcoinBlock()
 ext/bitcoin _ZN12BitcoinTxOutC1ER11QDataStream BitcoinTxOut::BitcoinTxOut(QDataStream&)
 ext/bitcoin _ZN12BitcoinTxOutC2ER11QDataStream BitcoinTxOut::BitcoinTxOut(QDataStream&)
+ext/bitcoin _ZN12BitcoinTxOutD1Ev BitcoinTxOut::~BitcoinTxOut()
+ext/bitcoin _ZN12BitcoinTxOutD2Ev BitcoinTxOut::~BitcoinTxOut()
 ext/bitcoin _ZN13BitcoinCrypto12doubleSha256ERK10QByteArray BitcoinCrypto::doubleSha256(QByteArray const&)
 ext/bitcoin _ZN13BitcoinCrypto4initEv BitcoinCrypto::init()
 ext/bitcoin _ZN13BitcoinStream10readStringER11QDataStream BitcoinStream::readString(QDataStream&)
@@ -46,6 +48,7 @@ ext/bitcoin _ZN5QListI11BitcoinTxInED1Ev QList<BitcoinTxIn>::~QList()
 ext/bitcoin _ZN5QListI11BitcoinTxInED2Ev QList<BitcoinTxIn>::~QList()
 ext/bitcoin _ZN5QListI12BitcoinTxOutE18detach_helper_growEii QList<BitcoinTxOut>::detach_helper_grow(int, int)
 ext/bitcoin _ZN5QListI12BitcoinTxOutE6appendERKS0_ QList<BitcoinTxOut>::append(BitcoinTxOut const&)
+ext/bitcoin _ZN5QListI12BitcoinTxOutE7deallocEPN9QListData4DataE.isra.5 QList<BitcoinTxOut>::dealloc(QListData::Data*) [clone .isra.5]
 ext/bitcoin _ZN5QListI12BitcoinTxOutEC1ERKS1_ QList<BitcoinTxOut>::QList(QList<BitcoinTxOut> const&)
 ext/bitcoin _ZN5QListI12BitcoinTxOutEC2ERKS1_ QList<BitcoinTxOut>::QList(QList<BitcoinTxOut> const&)
 ext/bitcoin _ZN5QListI12BitcoinTxOutED1Ev QList<BitcoinTxOut>::~QList()
@@ -101,6 +104,8 @@ ext/elasticsearch _ZN13ElasticSearchC2ERK7QStringP7QObject ElasticSearch::Elasti
 ext/elasticsearch _ZN13ElasticSearchD0Ev ElasticSearch::~ElasticSearch()
 ext/elasticsearch _ZN13ElasticSearchD1Ev ElasticSearch::~ElasticSearch()
 ext/elasticsearch _ZN13ElasticSearchD2Ev ElasticSearch::~ElasticSearch()
+ext/elasticsearch _ZN7QStringD1Ev QString::~QString()
+ext/elasticsearch _ZN7QStringD2Ev QString::~QString()
 ext/elasticsearch _ZNK13ElasticSearch10metaObjectEv ElasticSearch::metaObject() const
 ext/elasticsearch _ZTI13ElasticSearch typeinfo for ElasticSearch
 ext/elasticsearch _ZTS13ElasticSearch typeinfo name for ElasticSearch
@@ -119,12 +124,12 @@ ext/qamqp _ZL34qt_meta_stringdata_QAMQP__Exchange qt_meta_stringdata_QAMQP__Exch
 ext/qamqp _ZL36qt_meta_stringdata_QAMQP__Connection qt_meta_stringdata_QAMQP__Connection
 ext/qamqp _ZN10QByteArrayD1Ev QByteArray::~QByteArray()
 ext/qamqp _ZN10QByteArrayD2Ev QByteArray::~QByteArray()
-ext/qamqp _ZN12QWeakPointerI7QObjectED2Ev.isra.11 QWeakPointer<QObject>::~QWeakPointer() [clone .isra.11]
-ext/qamqp _ZN12QWeakPointerI7QObjectED2Ev.isra.14 QWeakPointer<QObject>::~QWeakPointer() [clone .isra.14]
-ext/qamqp _ZN12QWeakPointerI7QObjectED2Ev.isra.17 QWeakPointer<QObject>::~QWeakPointer() [clone .isra.17]
+ext/qamqp _ZN11QMetaTypeIdIN15QAbstractSocket11SocketErrorEE14qt_metatype_idEv.part.8 QMetaTypeId<QAbstractSocket::SocketError>::qt_metatype_id() [clone .part.8]
+ext/qamqp _ZN11QMetaTypeIdIN5QAMQP5Frame7decimalEE14qt_metatype_idEv.part.26 QMetaTypeId<QAMQP::Frame::decimal>::qt_metatype_id() [clone .part.26]
+ext/qamqp _ZN12QWeakPointerI7QObjectED1Ev QWeakPointer<QObject>::~QWeakPointer()
+ext/qamqp _ZN12QWeakPointerI7QObjectED2Ev QWeakPointer<QObject>::~QWeakPointer()
 ext/qamqp _ZN14QSharedPointerIN5QAMQP21AMQPlainAuthenticatorEE5derefEPN15QtSharedPointer20ExternalRefCountDataE QSharedPointer<QAMQP::AMQPlainAuthenticator>::deref(QtSharedPointer::ExternalRefCountData*)
-ext/qamqp _ZN14QSharedPointerIN5QAMQP7MessageEED1Ev QSharedPointer<QAMQP::Message>::~QSharedPointer()
-ext/qamqp _ZN14QSharedPointerIN5QAMQP7MessageEED2Ev QSharedPointer<QAMQP::Message>::~QSharedPointer()
+ext/qamqp _ZN14QSharedPointerIN5QAMQP7MessageEE5derefEPN15QtSharedPointer20ExternalRefCountDataE QSharedPointer<QAMQP::Message>::deref(QtSharedPointer::ExternalRefCountData*)
 ext/qamqp _ZN15QtSharedPointer33ExternalRefCountWithCustomDeleterIN5QAMQP13AuthenticatorENS_13NormalDeleterEE7deleterEPNS_20ExternalRefCountDataE QtSharedPointer::ExternalRefCountWithCustomDeleter<QAMQP::Authenticator, QtSharedPointer::NormalDeleter>::deleter(QtSharedPointer::ExternalRefCountData*)
 ext/qamqp _ZN15QtSharedPointer33ExternalRefCountWithCustomDeleterIN5QAMQP7MessageENS_13NormalDeleterEE7deleterEPNS_20ExternalRefCountDataE QtSharedPointer::ExternalRefCountWithCustomDeleter<QAMQP::Message, QtSharedPointer::NormalDeleter>::deleter(QtSharedPointer::ExternalRefCountData*)
 ext/qamqp _ZN17QtMetaTypePrivate23QMetaTypeFunctionHelperIN15QAbstractSocket11SocketErrorELb1EE6CreateEPKv QtMetaTypePrivate::QMetaTypeFunctionHelper<QAbstractSocket::SocketError, true>::Create(void const*)
@@ -143,6 +148,7 @@ ext/qamqp _ZN17QtMetaTypePrivate23QMetaTypeFunctionHelperIPN5QAMQP5QueueELb1EE6C
 ext/qamqp _ZN17QtMetaTypePrivate23QMetaTypeFunctionHelperIPN5QAMQP5QueueELb1EE6DeleteEPv QtMetaTypePrivate::QMetaTypeFunctionHelper<QAMQP::Queue*, true>::Delete(void*)
 ext/qamqp _ZN17QtMetaTypePrivate23QMetaTypeFunctionHelperIPN5QAMQP5QueueELb1EE8DestructEPv QtMetaTypePrivate::QMetaTypeFunctionHelper<QAMQP::Queue*, true>::Destruct(void*)
 ext/qamqp _ZN17QtMetaTypePrivate23QMetaTypeFunctionHelperIPN5QAMQP5QueueELb1EE9ConstructEPvPKv QtMetaTypePrivate::QMetaTypeFunctionHelper<QAMQP::Queue*, true>::Construct(void*, void const*)
+ext/qamqp _ZN18QMetaTypeIdQObjectIPN5QAMQP5QueueELb1EE14qt_metatype_idEv QMetaTypeIdQObject<QAMQP::Queue*, true>::qt_metatype_id()
 ext/qamqp _ZN5QAMQP10Connection11qt_metacallEN11QMetaObject4CallEiPPv QAMQP::Connection::qt_metacall(QMetaObject::Call, int, void**)
 ext/qamqp _ZN5QAMQP10Connection11qt_metacastEPKc QAMQP::Connection::qt_metacast(char const*)
 ext/qamqp _ZN5QAMQP10Connection12disconnectedEv QAMQP::Connection::disconnected()
@@ -455,6 +461,7 @@ ext/qamqp _ZN5QAMQP8ExchangeD0Ev QAMQP::Exchange::~Exchange()
 ext/qamqp _ZN5QAMQP8ExchangeD1Ev QAMQP::Exchange::~Exchange()
 ext/qamqp _ZN5QAMQP8ExchangeD2Ev QAMQP::Exchange::~Exchange()
 ext/qamqp _ZN5QHashI7QString8QVariantE11deleteNode2EPN9QHashData4NodeE QHash<QString, QVariant>::deleteNode2(QHashData::Node*)
+ext/qamqp _ZN5QHashI7QString8QVariantE13detach_helperEv QHash<QString, QVariant>::detach_helper()
 ext/qamqp _ZN5QHashI7QString8QVariantE13duplicateNodeEPN9QHashData4NodeEPv QHash<QString, QVariant>::duplicateNode(QHashData::Node*, void*)
 ext/qamqp _ZN5QHashI7QString8QVariantED1Ev QHash<QString, QVariant>::~QHash()
 ext/qamqp _ZN5QHashI7QString8QVariantED2Ev QHash<QString, QVariant>::~QHash()
@@ -462,24 +469,28 @@ ext/qamqp _ZN5QHashIi8QVariantE11deleteNode2EPN9QHashData4NodeE QHash<int, QVari
 ext/qamqp _ZN5QHashIi8QVariantE13duplicateNodeEPN9QHashData4NodeEPv QHash<int, QVariant>::duplicateNode(QHashData::Node*, void*)
 ext/qamqp _ZN5QHashIN5QAMQP5Frame7Content8PropertyE8QVariantE11deleteNode2EPN9QHashData4NodeE QHash<QAMQP::Frame::Content::Property, QVariant>::deleteNode2(QHashData::Node*)
 ext/qamqp _ZN5QHashIN5QAMQP5Frame7Content8PropertyE8QVariantE13duplicateNodeEPN9QHashData4NodeEPv QHash<QAMQP::Frame::Content::Property, QVariant>::duplicateNode(QHashData::Node*, void*)
-ext/qamqp _ZN5QHashIN5QAMQP5Frame7Content8PropertyE8QVariantED1Ev QHash<QAMQP::Frame::Content::Property, QVariant>::~QHash()
-ext/qamqp _ZN5QHashIN5QAMQP5Frame7Content8PropertyE8QVariantED2Ev QHash<QAMQP::Frame::Content::Property, QVariant>::~QHash()
 ext/qamqp _ZN5QHashIs5QListIPN5QAMQP5Frame13MethodHandlerEEE11deleteNode2EPN9QHashData4NodeE QHash<short, QList<QAMQP::Frame::MethodHandler*> >::deleteNode2(QHashData::Node*)
+ext/qamqp _ZN5QHashIs5QListIPN5QAMQP5Frame13MethodHandlerEEE13detach_helperEv QHash<short, QList<QAMQP::Frame::MethodHandler*> >::detach_helper()
 ext/qamqp _ZN5QHashIs5QListIPN5QAMQP5Frame13MethodHandlerEEE13duplicateNodeEPN9QHashData4NodeEPv QHash<short, QList<QAMQP::Frame::MethodHandler*> >::duplicateNode(QHashData::Node*, void*)
 ext/qamqp _ZN5QHashIs5QListIPN5QAMQP5Frame13MethodHandlerEEED1Ev QHash<short, QList<QAMQP::Frame::MethodHandler*> >::~QHash()
 ext/qamqp _ZN5QHashIs5QListIPN5QAMQP5Frame13MethodHandlerEEED2Ev QHash<short, QList<QAMQP::Frame::MethodHandler*> >::~QHash()
 ext/qamqp _ZN5QHashIs5QListIPN5QAMQP5Frame14ContentHandlerEEE11deleteNode2EPN9QHashData4NodeE QHash<short, QList<QAMQP::Frame::ContentHandler*> >::deleteNode2(QHashData::Node*)
+ext/qamqp _ZN5QHashIs5QListIPN5QAMQP5Frame14ContentHandlerEEE13detach_helperEv QHash<short, QList<QAMQP::Frame::ContentHandler*> >::detach_helper()
 ext/qamqp _ZN5QHashIs5QListIPN5QAMQP5Frame14ContentHandlerEEE13duplicateNodeEPN9QHashData4NodeEPv QHash<short, QList<QAMQP::Frame::ContentHandler*> >::duplicateNode(QHashData::Node*, void*)
 ext/qamqp _ZN5QHashIs5QListIPN5QAMQP5Frame14ContentHandlerEEED1Ev QHash<short, QList<QAMQP::Frame::ContentHandler*> >::~QHash()
 ext/qamqp _ZN5QHashIs5QListIPN5QAMQP5Frame14ContentHandlerEEED2Ev QHash<short, QList<QAMQP::Frame::ContentHandler*> >::~QHash()
 ext/qamqp _ZN5QHashIs5QListIPN5QAMQP5Frame18ContentBodyHandlerEEE11deleteNode2EPN9QHashData4NodeE QHash<short, QList<QAMQP::Frame::ContentBodyHandler*> >::deleteNode2(QHashData::Node*)
+ext/qamqp _ZN5QHashIs5QListIPN5QAMQP5Frame18ContentBodyHandlerEEE13detach_helperEv QHash<short, QList<QAMQP::Frame::ContentBodyHandler*> >::detach_helper()
 ext/qamqp _ZN5QHashIs5QListIPN5QAMQP5Frame18ContentBodyHandlerEEE13duplicateNodeEPN9QHashData4NodeEPv QHash<short, QList<QAMQP::Frame::ContentBodyHandler*> >::duplicateNode(QHashData::Node*, void*)
 ext/qamqp _ZN5QHashIs5QListIPN5QAMQP5Frame18ContentBodyHandlerEEED1Ev QHash<short, QList<QAMQP::Frame::ContentBodyHandler*> >::~QHash()
 ext/qamqp _ZN5QHashIs5QListIPN5QAMQP5Frame18ContentBodyHandlerEEED2Ev QHash<short, QList<QAMQP::Frame::ContentBodyHandler*> >::~QHash()
 ext/qamqp _ZN5QListI14QSharedPointerIN5QAMQP7MessageEEE13detach_helperEi QList<QSharedPointer<QAMQP::Message> >::detach_helper(int)
+ext/qamqp _ZN5QListI14QSharedPointerIN5QAMQP7MessageEEE13detach_helperEv QList<QSharedPointer<QAMQP::Message> >::detach_helper()
 ext/qamqp _ZN5QListI14QSharedPointerIN5QAMQP7MessageEEE18detach_helper_growEii QList<QSharedPointer<QAMQP::Message> >::detach_helper_grow(int, int)
 ext/qamqp _ZN5QListI14QSharedPointerIN5QAMQP7MessageEEE6appendERKS3_ QList<QSharedPointer<QAMQP::Message> >::append(QSharedPointer<QAMQP::Message> const&)
-ext/qamqp _ZN5QListI14QSharedPointerIN5QAMQP7MessageEEE7deallocEPN9QListData4DataE.isra.35 QList<QSharedPointer<QAMQP::Message> >::dealloc(QListData::Data*) [clone .isra.35]
+ext/qamqp _ZN5QListI14QSharedPointerIN5QAMQP7MessageEEE7deallocEPN9QListData4DataE.isra.23 QList<QSharedPointer<QAMQP::Message> >::dealloc(QListData::Data*) [clone .isra.23]
+ext/qamqp _ZN5QListI14QSharedPointerIN5QAMQP7MessageEEED1Ev QList<QSharedPointer<QAMQP::Message> >::~QList()
+ext/qamqp _ZN5QListI14QSharedPointerIN5QAMQP7MessageEEED2Ev QList<QSharedPointer<QAMQP::Message> >::~QList()
 ext/qamqp _ZN5QListI5QPairI7QStringS1_EE18detach_helper_growEii QList<QPair<QString, QString> >::detach_helper_grow(int, int)
 ext/qamqp _ZN5QListI5QPairI7QStringS1_EE6appendERKS2_ QList<QPair<QString, QString> >::append(QPair<QString, QString> const&)
 ext/qamqp _ZN5QListI5QPairI7QStringS1_EEC1ERKS3_ QList<QPair<QString, QString> >::QList(QList<QPair<QString, QString> > const&)
@@ -490,9 +501,11 @@ ext/qamqp _ZN5QListI8QVariantE18detach_helper_growEii QList<QVariant>::detach_he
 ext/qamqp _ZN5QListI8QVariantE6appendERKS0_ QList<QVariant>::append(QVariant const&)
 ext/qamqp _ZN5QListI8QVariantED1Ev QList<QVariant>::~QList()
 ext/qamqp _ZN5QListI8QVariantED2Ev QList<QVariant>::~QList()
+ext/qamqp _ZN5QListIiE13detach_helperEi QList<int>::detach_helper(int)
 ext/qamqp _ZN5QListIiE18detach_helper_growEii QList<int>::detach_helper_grow(int, int)
 ext/qamqp _ZN5QListIiE6appendERKi QList<int>::append(int const&)
-ext/qamqp _ZN5QListIiE7reserveEi QList<int>::reserve(int)
+ext/qamqp _ZN5QListIiEC1ERKS0_ QList<int>::QList(QList<int> const&)
+ext/qamqp _ZN5QListIiEC2ERKS0_ QList<int>::QList(QList<int> const&)
 ext/qamqp _ZN5QListIiED1Ev QList<int>::~QList()
 ext/qamqp _ZN5QListIiED2Ev QList<int>::~QList()
 ext/qamqp _ZN5QListIPN5QAMQP5Frame13MethodHandlerEE18detach_helper_growEii QList<QAMQP::Frame::MethodHandler*>::detach_helper_grow(int, int)
@@ -515,8 +528,6 @@ ext/qamqp _ZN5QListIPN5QAMQP5Frame18ContentBodyHandlerEED1Ev QList<QAMQP::Frame:
 ext/qamqp _ZN5QListIPN5QAMQP5Frame18ContentBodyHandlerEED2Ev QList<QAMQP::Frame::ContentBodyHandler*>::~QList()
 ext/qamqp _ZN5QPairI7QStringS0_ED1Ev QPair<QString, QString>::~QPair()
 ext/qamqp _ZN5QPairI7QStringS0_ED2Ev QPair<QString, QString>::~QPair()
-ext/qamqp _ZN6QDebugD1Ev QDebug::~QDebug()
-ext/qamqp _ZN6QDebugD2Ev QDebug::~QDebug()
 ext/qamqp _ZN7QStringD1Ev QString::~QString()
 ext/qamqp _ZN7QStringD2Ev QString::~QString()
 ext/qamqp _ZNK5QAMQP10Connection10metaObjectEv QAMQP::Connection::metaObject() const
@@ -575,6 +586,7 @@ ext/qamqp _ZNK5QAMQP8Exchange10metaObjectEv QAMQP::Exchange::metaObject() const
 ext/qamqp _ZNK5QAMQP8Exchange4typeEv QAMQP::Exchange::type() const
 ext/qamqp _ZNK5QAMQP8Exchange6optionEv QAMQP::Exchange::option() const
 ext/qamqp _ZNK5QHashI7QString8QVariantE8findNodeERKS0_Pj QHash<QString, QVariant>::findNode(QString const&, unsigned int*) const
+ext/qamqp _ZNK5QHashIi8QVariantE4keysEv QHash<int, QVariant>::keys() const
 ext/qamqp _ZNK5QHashIi8QVariantE8findNodeERKiPj QHash<int, QVariant>::findNode(int const&, unsigned int*) const
 ext/qamqp _ZNK5QHashIN5QAMQP5Frame7Content8PropertyE8QVariantE8findNodeERKS3_Pj QHash<QAMQP::Frame::Content::Property, QVariant>::findNode(QAMQP::Frame::Content::Property const&, unsigned int*) const
 ext/qamqp _ZNK5QHashIs5QListIPN5QAMQP5Frame13MethodHandlerEEE8findNodeERKsPj QHash<short, QList<QAMQP::Frame::MethodHandler*> >::findNode(short const&, unsigned int*) const
@@ -644,34 +656,6 @@ ext/qamqp _ZTVN5QAMQP8ExchangeE vtable for QAMQP::Exchange
 ext/qamqp _ZZN11QMetaTypeIdIN15QAbstractSocket11SocketErrorEE14qt_metatype_idEvE11metatype_id QMetaTypeId<QAbstractSocket::SocketError>::qt_metatype_id()::metatype_id
 ext/qamqp _ZZN11QMetaTypeIdIN5QAMQP5Frame7decimalEE14qt_metatype_idEvE11metatype_id QMetaTypeId<QAMQP::Frame::decimal>::qt_metatype_id()::metatype_id
 ext/qamqp _ZZN18QMetaTypeIdQObjectIPN5QAMQP5QueueELb1EE14qt_metatype_idEvE11metatype_id QMetaTypeIdQObject<QAMQP::Queue*, true>::qt_metatype_id()::metatype_id
-ext/qamqp _ZZN5QAMQP12QueuePrivate6bindOkERKNS_5Frame6MethodEE19__PRETTY_FUNCTION__ QAMQP::QueuePrivate::bindOk(QAMQP::Frame::Method const&)::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP12QueuePrivate8deleteOkERKNS_5Frame6MethodEE19__PRETTY_FUNCTION__ QAMQP::QueuePrivate::deleteOk(QAMQP::Frame::Method const&)::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP12QueuePrivate8unbindOkERKNS_5Frame6MethodEE19__PRETTY_FUNCTION__ QAMQP::QueuePrivate::unbindOk(QAMQP::Frame::Method const&)::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP12QueuePrivate9consumeOkERKNS_5Frame6MethodEE19__PRETTY_FUNCTION__ QAMQP::QueuePrivate::consumeOk(QAMQP::Frame::Method const&)::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP12QueuePrivate9declareOkERKNS_5Frame6MethodEE19__PRETTY_FUNCTION__ QAMQP::QueuePrivate::declareOk(QAMQP::Frame::Method const&)::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP14ChannelPrivate4openEvE19__PRETTY_FUNCTION__ QAMQP::ChannelPrivate::open()::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP14ChannelPrivate5closeERKNS_5Frame6MethodEE19__PRETTY_FUNCTION__ QAMQP::ChannelPrivate::close(QAMQP::Frame::Method const&)::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP14ChannelPrivate6openOkERKNS_5Frame6MethodEE19__PRETTY_FUNCTION__ QAMQP::ChannelPrivate::openOk(QAMQP::Frame::Method const&)::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP14ChannelPrivate9_q_methodERKNS_5Frame6MethodEE19__PRETTY_FUNCTION__ QAMQP::ChannelPrivate::_q_method(QAMQP::Frame::Method const&)::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP15ExchangePrivate15_q_disconnectedEvE19__PRETTY_FUNCTION__ QAMQP::ExchangePrivate::_q_disconnected()::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP15ExchangePrivate8deleteOkERKNS_5Frame6MethodEE19__PRETTY_FUNCTION__ QAMQP::ExchangePrivate::deleteOk(QAMQP::Frame::Method const&)::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP15ExchangePrivate9declareOkERKNS_5Frame6MethodEE19__PRETTY_FUNCTION__ QAMQP::ExchangePrivate::declareOk(QAMQP::Frame::Method const&)::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP17ConnectionPrivate4tuneERKNS_5Frame6MethodEE19__PRETTY_FUNCTION__ QAMQP::ConnectionPrivate::tune(QAMQP::Frame::Method const&)::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP17ConnectionPrivate5closeERKNS_5Frame6MethodEE19__PRETTY_FUNCTION__ QAMQP::ConnectionPrivate::close(QAMQP::Frame::Method const&)::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP17ConnectionPrivate5startERKNS_5Frame6MethodEE19__PRETTY_FUNCTION__ QAMQP::ConnectionPrivate::start(QAMQP::Frame::Method const&)::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP17ConnectionPrivate6openOkERKNS_5Frame6MethodEE19__PRETTY_FUNCTION__ QAMQP::ConnectionPrivate::openOk(QAMQP::Frame::Method const&)::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP17ConnectionPrivate9_q_methodERKNS_5Frame6MethodEE19__PRETTY_FUNCTION__ QAMQP::ConnectionPrivate::_q_method(QAMQP::Frame::Method const&)::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP5Frame10writeFieldEaR11QDataStreamRK8QVariantbE19__PRETTY_FUNCTION__ QAMQP::Frame::writeField(signed char, QDataStream&, QVariant const&, bool)::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP5Frame4Base7readEndER11QDataStreamE19__PRETTY_FUNCTION__ QAMQP::Frame::Base::readEnd(QDataStream&)::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP5Frame5printERK5QHashI7QString8QVariantEE19__PRETTY_FUNCTION__ QAMQP::Frame::print(QHash<QString, QVariant> const&)::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP5Frame9readFieldEaR11QDataStreamE19__PRETTY_FUNCTION__ QAMQP::Frame::readField(signed char, QDataStream&)::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP7MessageC1EvE19__PRETTY_FUNCTION__ QAMQP::Message::Message()::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP7MessageD1EvE19__PRETTY_FUNCTION__ QAMQP::Message::~Message()::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP7Network5errorEN15QAbstractSocket11SocketErrorEE19__PRETTY_FUNCTION__ QAMQP::Network::error(QAbstractSocket::SocketError)::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP7Network9connectToERK7QStringjE19__PRETTY_FUNCTION__ QAMQP::Network::connectTo(QString const&, unsigned int)::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP7Network9readyReadEvE19__PRETTY_FUNCTION__ QAMQP::Network::readyRead()::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP8Exchange4bindERK7QStringE19__PRETTY_FUNCTION__ QAMQP::Exchange::bind(QString const&)::__PRETTY_FUNCTION__
-ext/qamqp _ZZN5QAMQP8Exchange4bindERK7QStringS3_E19__PRETTY_FUNCTION__ QAMQP::Exchange::bind(QString const&, QString const&)::__PRETTY_FUNCTION__
 ext/tcpline _ZL26qt_meta_data_ClientTcpLine qt_meta_data_ClientTcpLine
 ext/tcpline _ZL32qt_meta_stringdata_ClientTcpLine qt_meta_stringdata_ClientTcpLine
 ext/tcpline _ZN10QByteArrayD1Ev QByteArray::~QByteArray()
