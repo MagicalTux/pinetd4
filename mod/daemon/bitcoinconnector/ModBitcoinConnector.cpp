@@ -3,20 +3,13 @@
 #include <QStringList>
 #include <QVariant>
 #include <QTcpSocket>
-#include <QSqlQuery>
-#include <QSqlError>
 #include <ext/BitcoinNetAddr.hpp>
 #include <ext/BitcoinBlock.hpp>
 
-#if 0
-#define SQL_QUERY(_var, _req) static bool req_prepared_ ## _var = false; QSqlQuery _var(db); if (!req_prepared_ ## _var) { req_prepared_ ## _var = true; _var.prepare(_req); _var.setForwardOnly(true); }
-#define SQL_BIND(_query, _var, _val) static QVariant req_bind_var_ ## _query ## _var; static bool req_bind_var_ ## _query ## _var ## _bound = false; if (!req_bind_var_ ## _query ## _var ## _bound) { req_bind_var_ ## _query ## _var ## _bound = true; _query.bindValue(":" #_var, req_bind_var_ ## _query ## _var); } req_bind_var_ ## _query ## _var = _val;
-#else
-#define SQL_QUERY(_var, _req) QSqlQuery _var(db); _var.prepare(_req); _var.setForwardOnly(true);
-#define SQL_BIND(_query, _var, _val) _query.bindValue(":" #_var, _val);
-#endif
+#define SQL_QUERY(_var, _req)
+#define SQL_BIND(_query, _var, _val)
 
-ModBitcoinConnector::ModBitcoinConnector(const QString &modname, const QString &instname): Daemon(modname, instname), db_lock(QMutex::Recursive) {
+ModBitcoinConnector::ModBitcoinConnector(const QString &modname, const QString &instname): Daemon(modname, instname) {
 	qDebug("ModBitcoinConnector: new instance");
 	db_open = false;
 	inventory_queue_timer.setSingleShot(false);
@@ -30,53 +23,46 @@ const QByteArray &ModBitcoinConnector::getClientId() const {
 
 quint32 ModBitcoinConnector::getBlockHeight() {
 	// TODO store this value in cache for fast retriveral
-	db_lock.lock();
-	SQL_QUERY(query, "SELECT height FROM blocks ORDER BY height DESC LIMIT 1");
-	if (!query.exec()) {
-		db_lock.unlock();
-		return 0; // error
-	}
-	if (!query.next()) {
-		db_lock.unlock();
-		return 0; // wat?
-	}
-	int res = query.value(0).toInt();
-	db_lock.unlock();
-	return res;
+	
+	if (!db_open) return 0;
+
+	// make things [faster/easier to read] by passing json string directly
+	QJsonObject stat = db->search("{\"index\":\"bitcoin\",\"body\":{\"query\":{\"match_all\":{}},\"facets\":{\"stat1\":{\"statistical\":{\"field\":\"block.depth\"}}}}}");
+
+	return stat.value("facets").toObject().value("stat1").toObject().value("max").toDouble();
 }
 
 BitcoinBlock ModBitcoinConnector::getLastBlock() {
-	db_lock.lock();
+#if 0
 	SQL_QUERY(query, "SELECT height, data FROM blocks ORDER BY height DESC LIMIT 1");
 	if (!query.exec()) {
-		db_lock.unlock();
 		return BitcoinBlock(); // error
 	}
 	if (!query.next()) {
-		db_lock.unlock();
 		return BitcoinBlock(); // wat?
 	}
 	quint32 height = query.value(0).toUInt();
 	QByteArray res = query.value(1).toByteArray();
-	db_lock.unlock();
 	return BitcoinBlock(res, height);
+#endif
+	return BitcoinBlock();
 }
 
 BitcoinBlock ModBitcoinConnector::getBlock(const QByteArray &hash) {
-	db_lock.lock();
+#if 0
 	SQL_QUERY(query, "SELECT height, data FROM blocks WHERE hash = :hash");
 	SQL_BIND(query, hash, hash);
 	if (!query.exec()) {
-		db_lock.unlock();
 		return BitcoinBlock(); // error
 	}
 	if (!query.next()) {
-		db_lock.unlock();
 		return BitcoinBlock(); // wat?
 	}
 	int height = query.value(0).toInt();
 	QByteArray res = query.value(1).toByteArray();
 	return BitcoinBlock(res, height);
+#endif
+	return BitcoinBlock();
 }
 
 QByteArray ModBitcoinConnector::getInventory(quint32 type, const QByteArray &hash) {
@@ -86,40 +72,34 @@ QByteArray ModBitcoinConnector::getInventory(quint32 type, const QByteArray &has
 
 	if (inventory_cache.contains(key)) return *inventory_cache.object(key);
 
+#if 0
 	if (type == 1) {
-		db_lock.lock();
 		SQL_QUERY(query, "SELECT data FROM tx WHERE txid = :txid");
 		SQL_BIND(query, txid, hash);
 		if (!query.exec()) {
-			db_lock.unlock();
 			return QByteArray(); // error
 		}
 		if (!query.next()) {
-			db_lock.unlock();
 			return QByteArray(); // wat?
 		}
 		QByteArray res = query.value(0).toByteArray();
 		inventory_cache.insert(key, new QByteArray(res));
-		db_lock.unlock();
 		return res;
 	}
 	if (type == 2) {
-		db_lock.lock();
 		SQL_QUERY(query, "SELECT data FROM blocks WHERE hash = :hash");
 		SQL_BIND(query, hash, hash);
 		if (!query.exec()) {
-			db_lock.unlock();
 			return QByteArray(); // error
 		}
 		if (!query.next()) {
-			db_lock.unlock();
 			return QByteArray(); // wat?
 		}
 		QByteArray res = query.value(0).toByteArray();
 		inventory_cache.insert(key, new QByteArray(res));
-		db_lock.unlock();
 		return res;
 	}
+#endif
 	return QByteArray();
 }
 
@@ -131,38 +111,32 @@ bool ModBitcoinConnector::knows(quint32 type, const QByteArray &hash) {
 //	qDebug("ModBitcoinConnector: do I know %d:%s?", type, qPrintable(hash.toHex()));
 	if (inventory_cache.contains(key)) return true;
 
+#if 0
 	if (type == 1) {
-		db_lock.lock();
 		SQL_QUERY(query, "SELECT COUNT(*) FROM tx WHERE txid = :txid");
 		SQL_BIND(query, txid, hash);
 		if (!query.exec()) {
-			db_lock.unlock();
 			return false; // error
 		}
 		if (!query.next()) {
-			db_lock.unlock();
 			return false; // wat?
 		}
 		int res = query.value(0).toInt();
-		db_lock.unlock();
 		return res > 0;
 	}
 	if (type == 2) {
-		db_lock.lock();
 		SQL_QUERY(query, "SELECT COUNT(*) FROM blocks WHERE hash = :hash");
 		SQL_BIND(query, hash, hash);
 		if (!query.exec()) {
-			db_lock.unlock();
 			return false; // error
 		}
 		if (!query.next()) {
-			db_lock.unlock();
 			return false; // wat?
 		}
 		int res = query.value(0).toInt();
-		db_lock.unlock();
 		return res > 0;
 	}
+#endif
 	return false; // wtf?
 }
 
@@ -176,19 +150,19 @@ void ModBitcoinConnector::addInventory(quint32 type, const QByteArray &hash, con
 	if (send_inv)
 		inventory_queue.append(key);
 
+#if 0
 	if (type == 1) {
-		db_lock.lock();
 		SQL_QUERY(query, "INSERT INTO tx (txid, data) VALUES (:txid, :blob)");
 		SQL_BIND(query, txid, hash);
 		SQL_BIND(query, blob, data);
 		if (!query.exec())
 			qDebug("failed to exec query: %s", qPrintable(query.lastError().text()));
-		db_lock.unlock();
 	}
 	if (type == 2) {
 		qDebug("cannot use this method to save blocks");
 		abort();
 	}
+#endif
 }
 
 void ModBitcoinConnector::addBlock(const BitcoinBlock&block) {
@@ -201,7 +175,7 @@ void ModBitcoinConnector::addBlock(const BitcoinBlock&block) {
 	QByteArray key;
 	QList<BitcoinTx> txs = block.getTransactions();
 
-	db_lock.lock();
+#if 0
 	db.transaction();
 
 	for(int i = 0; i < txs.size(); i++) {
@@ -215,7 +189,6 @@ void ModBitcoinConnector::addBlock(const BitcoinBlock&block) {
 		if (!query2.exec()) {
 			qDebug("failed to exec blocks_txs query: %s", qPrintable(query2.lastError().text()));
 			db.rollback();
-			db_lock.unlock();
 			return;
 		}
 	}
@@ -234,11 +207,10 @@ void ModBitcoinConnector::addBlock(const BitcoinBlock&block) {
 	if (!query.exec()) {
 		qDebug("failed to exec query: %s", qPrintable(query.lastError().text()));
 		db.rollback();
-		db_lock.unlock();
 		return;
 	}
 	db.commit();
-	db_lock.unlock();
+#endif
 }
 
 void ModBitcoinConnector::sendQueuedInventory() {
@@ -257,70 +229,26 @@ void ModBitcoinConnector::registerPeer(const BitcoinNetAddr &a, quint32 stamp) {
 void ModBitcoinConnector::registerPeer(const QString &key, quint64 services, quint32 stamp) {
 	if (stamp > time(NULL)) stamp = time(NULL);
 	qDebug("got peer: %s %lu %u", qPrintable(key), services, stamp);
+	if (!peer_learn) return; // do not learn/connect to peer
+	// should connect to new peer
 }
 
 void ModBitcoinConnector::doDatabaseInit() {
-	db_lock.lock();
-	// indexes we need:
-	// [blockheight=>block], addr=>tx_in, addr=>tx_out, [parentblock=>block]
-	db.exec("PRAGMA synchronous = OFF");
-
-	db.exec("CREATE TABLE IF NOT EXISTS tx (txid CHAR(64), data LONGBLOB)");
-	db.exec("CREATE UNIQUE INDEX IF NOT EXISTS tx_txid ON tx(txid)");
-
-	db.exec("CREATE TABLE IF NOT EXISTS blocks (hash BINARY(32), parent BINARY(32), height INT, data LONGBLOB)");
-	db.exec("CREATE UNIQUE INDEX IF NOT EXISTS blocks_hash ON blocks(hash)");
-	db.exec("CREATE INDEX IF NOT EXISTS blocks_parent ON blocks(parent)");
-	db.exec("CREATE INDEX IF NOT EXISTS blocks_height ON blocks(height)");
-
-	db.exec("CREATE TABLE IF NOT EXISTS blocks_txs (block BINARY(32), tx BINARY(32), idx INT)");
-	db.exec("CREATE UNIQUE INDEX IF NOT EXISTS blocks_txs_full ON blocks_txs(block,idx)");
-	db.exec("CREATE INDEX IF NOT EXISTS blocks_txs_tx ON blocks_txs(tx)");
-	db.exec("CREATE INDEX IF NOT EXISTS blocks_txs_block ON blocks_txs(block)");
-
-	db.exec("CREATE TABLE IF NOT EXISTS peer (key VARCHAR(45), stamp BIGINT, services BIGINT, version LONGBLOB)");
-	db.exec("CREATE UNIQUE INDEX IF NOT EXISTS peer_key ON peer(key)");
-
-	db.exec("CREATE TABLE IF NOT EXISTS addr (addr BINARY(16), txout BINARY(32), txout_n INT)");
-	db.exec("CREATE UNIQUE INDEX IF NOT EXISTS addr_all ON addr(addr,txout,txout_n)");
-
-	// link table txout => txin (also if has entry to confirmed tx = claimed output)
-	db.exec("CREATE TABLE IF NOT EXISTS txout_txin(txout BINARY(32), txout_n INT, txin BINARY(32), txin_n INT)");
-	db.exec("CREATE UNIQUE INDEX IF NOT EXISTS txout_txin_all ON txout_txin(txout, txout_n, txin, txin_n)");
-
-	db_lock.unlock();
+	// create db struct
 }
 
 void ModBitcoinConnector::reload() {
 	QMap<QString,QVariant> conf = getConfig();
 
 	if (!db_open) {
-		if (!conf.contains("db_type"))
-			conf.insert("db_type", "SQLITE");
-
-		if ((!conf.contains("db_database")) && (conf.value("db_type") == "SQLITE"))
-			conf.insert("db_database", "/tmp/bitcoinconnector.db");
-
-		db_lock.lock();
-		db = QSqlDatabase::addDatabase(conf.value("db_type").toString(), instanceName());
-		db.setHostName(conf.value("db_hostname").toString());
-		if (conf.contains("db_username")) db.setUserName(conf.value("db_username").toString());
-		if (conf.contains("db_password")) db.setPassword(conf.value("db_password").toString());
-		if (conf.contains("db_database")) db.setDatabaseName(conf.value("db_database").toString());
-		if (conf.contains("db_options")) db.setConnectOptions(conf.value("db_options").toString());
-
-		if (!db.open()) {
-			qDebug("failed to open database: %s", qPrintable(db.lastError().text()));
-			qDebug() << conf;
-			db_lock.unlock();
-			return;
-		}
-		db_lock.unlock();
+		db = new ElasticSearch(conf.value("es_host","http://127.0.0.1:9200").toString(), this);
 
 		doDatabaseInit();
 
 		db_open = true;
 	}
+
+	peer_learn = conf.value("peer_learn", true).toBool();
 
 	QStringList conf_peers;
 	if (conf.contains("peer_seed")) {

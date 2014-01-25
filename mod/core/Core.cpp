@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QRegExp>
 #include <QThread>
+#include <QCoreApplication>
 #ifdef Q_OS_UNIX
 #include <core/CoreUdg.hpp>
 #endif
@@ -93,6 +94,16 @@ void Core::reloadConfig() {
 			QString mod_name = settings.value(k.at(i)).toString();
 			qDebug("Core: loading daemon: %s module %s", qPrintable(k.at(i)), qPrintable(mod_name));
 			if (!modprobe(mod_name)) continue;
+
+			// _Z14pinetd_preloadP4Core = pinetd_preload(Core*)
+			bool (*callback_preload)(Core*);
+			callback_preload = (bool(*)(Core*))modules.value(mod_name)->resolve("_Z14pinetd_preloadP4Core");
+			if (callback_preload != NULL) {
+				if (!callback_preload(this)) {
+					qDebug("Core: failed to load daemon %s due to preload error", qPrintable(k.at(i)));
+					continue;
+				}
+			}
 
 			// _Z18pinetd_instanciateRK7QStringS1_ = pinetd_instanciate(QString const&, QString const&)
 			Daemon *(*callback)(const QString &, const QString &);
@@ -221,16 +232,18 @@ bool Core::modprobe(const QString &name) {
 
 	qDebug("Core: loading module %s", qPrintable(name));
 
-	QLibrary *lib = new QLibrary(QString("mod/")+name, this);
-
-	if (name.left(4) == "ext/") {
-		// if an extension, export symbols to other modules
-		lib->setLoadHints(QLibrary::ResolveAllSymbolsHint | QLibrary::ExportExternalSymbolsHint);
-	} else {
-		lib->setLoadHints(QLibrary::ResolveAllSymbolsHint);
-	}
+	QLibrary *lib = NULL;
 
 	while(1) {
+		if (!lib) {
+			lib = new QLibrary(QCoreApplication::applicationDirPath() + QString("/mod/")+name+QString(".so"), this); // TODO make this more neutral - QLibrary::load has a problem on linux
+			if (name.left(4) == "ext/") {
+				// if an extension, export symbols to other modules
+				lib->setLoadHints(QLibrary::ExportExternalSymbolsHint);
+			} else {
+				lib->setLoadHints(0);
+			}
+		}
 		if (!lib->load()) {
 			QString err = lib->errorString();
 			// Cannot load library mod/daemon/broadcast: (mod/daemon/libbroadcast.so: undefined symbol: _ZTI13ClientTcpLine)
@@ -243,7 +256,10 @@ bool Core::modprobe(const QString &name) {
 //						qDebug("Core: missing symbol: %s - loading %s", qPrintable(sym), qPrintable(mod));
 						if (modprobe(mod)) {
 							// need to call "unload" so it'll try again
-							lib->unload();
+							lib->load(); // try once again to load
+							lib->unload(); // so we can unload
+							delete lib;
+							lib = NULL; // force full retry
 							continue;
 						}
 					}

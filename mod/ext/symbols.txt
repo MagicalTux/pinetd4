@@ -99,6 +99,9 @@ ext/elasticsearch _ZN13ElasticSearch11qt_metacallEN11QMetaObject4CallEiPPv Elast
 ext/elasticsearch _ZN13ElasticSearch11qt_metacastEPKc ElasticSearch::qt_metacast(char const*)
 ext/elasticsearch _ZN13ElasticSearch16staticMetaObjectE ElasticSearch::staticMetaObject
 ext/elasticsearch _ZN13ElasticSearch18qt_static_metacallEP7QObjectN11QMetaObject4CallEiPPv ElasticSearch::qt_static_metacall(QObject*, QMetaObject::Call, int, void**)
+ext/elasticsearch _ZN13ElasticSearch5indexERK11QJsonObject ElasticSearch::index(QJsonObject const&)
+ext/elasticsearch _ZN13ElasticSearch6searchERK10QByteArray ElasticSearch::search(QByteArray const&)
+ext/elasticsearch _ZN13ElasticSearch6searchERK11QJsonObject ElasticSearch::search(QJsonObject const&)
 ext/elasticsearch _ZN13ElasticSearchC1ERK7QStringP7QObject ElasticSearch::ElasticSearch(QString const&, QObject*)
 ext/elasticsearch _ZN13ElasticSearchC2ERK7QStringP7QObject ElasticSearch::ElasticSearch(QString const&, QObject*)
 ext/elasticsearch _ZN13ElasticSearchD0Ev ElasticSearch::~ElasticSearch()
@@ -110,6 +113,9 @@ ext/elasticsearch _ZNK13ElasticSearch10metaObjectEv ElasticSearch::metaObject() 
 ext/elasticsearch _ZTI13ElasticSearch typeinfo for ElasticSearch
 ext/elasticsearch _ZTS13ElasticSearch typeinfo name for ElasticSearch
 ext/elasticsearch _ZTV13ElasticSearch vtable for ElasticSearch
+ext/elasticsearch _ZZN13ElasticSearch5indexERK11QJsonObjectE19__PRETTY_FUNCTION__ ElasticSearch::index(QJsonObject const&)::__PRETTY_FUNCTION__
+ext/elasticsearch _ZZN13ElasticSearch6searchERK10QByteArrayE19__PRETTY_FUNCTION__ ElasticSearch::search(QByteArray const&)::__PRETTY_FUNCTION__
+ext/elasticsearch _ZZN13ElasticSearchC1ERK7QStringP7QObjectE19__PRETTY_FUNCTION__ ElasticSearch::ElasticSearch(QString const&, QObject*)::__PRETTY_FUNCTION__
 ext/qamqp _ZL25qt_meta_data_QAMQP__Queue qt_meta_data_QAMQP__Queue
 ext/qamqp _ZL26qt_meta_data_QAMQP__Client qt_meta_data_QAMQP__Client
 ext/qamqp _ZL27qt_meta_data_QAMQP__Channel qt_meta_data_QAMQP__Channel

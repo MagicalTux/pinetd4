@@ -1,6 +1,6 @@
 #include <core/Daemon.hpp>
+#include <ext/ElasticSearch.hpp>
 #include <QSet>
-#include <QSqlDatabase>
 #include <QHostAddress>
 #include <QCache>
 #include <QTimer>
@@ -49,12 +49,12 @@ private:
 
 	QList<QTcpSocket*> tmp_cnx;
 	QMap<QString,ModBitcoinConnectorClient*> peers;
+	bool peer_learn;
 	QByteArray client_id;
 	QSet<QByteArray> nonce;
 
 	bool db_open;
-	QSqlDatabase db;
-	QMutex db_lock;
+	ElasticSearch *db;
 	QCache<QByteArray, QByteArray> inventory_cache;
 
 	QList<QByteArray> inventory_queue;

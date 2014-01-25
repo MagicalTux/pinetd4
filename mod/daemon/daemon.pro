@@ -1,5 +1,5 @@
 TEMPLATE = subdirs
-SUBDIRS = echo chargen chargensame broadcast ps kumoircd bitcoinconnector vserv midasinput
+SUBDIRS = echo chargen chargensame broadcast ps kumoircd vserv midasinput
 contains(QT_VERSION, ^5.*) {
-	SUBDIRS += vps
+	SUBDIRS += bitcoinconnector vps
 }

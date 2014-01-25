@@ -2,7 +2,7 @@
 #include <QCryptographicHash>
 
 bool BitcoinCrypto::init() {
-	// no more QCA
+	// no more QCA - no need to do much
 	return true;
 }
 
