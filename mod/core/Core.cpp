@@ -95,16 +95,6 @@ void Core::reloadConfig() {
 			qDebug("Core: loading daemon: %s module %s", qPrintable(k.at(i)), qPrintable(mod_name));
 			if (!modprobe(mod_name)) continue;
 
-			// _Z14pinetd_preloadP4Core = pinetd_preload(Core*)
-			bool (*callback_preload)(Core*);
-			callback_preload = (bool(*)(Core*))modules.value(mod_name)->resolve("_Z14pinetd_preloadP4Core");
-			if (callback_preload != NULL) {
-				if (!callback_preload(this)) {
-					qDebug("Core: failed to load daemon %s due to preload error", qPrintable(k.at(i)));
-					continue;
-				}
-			}
-
 			// _Z18pinetd_instanciateRK7QStringS1_ = pinetd_instanciate(QString const&, QString const&)
 			Daemon *(*callback)(const QString &, const QString &);
 			callback = (Daemon*(*)(const QString &, const QString &))modules.value(mod_name)->resolve("_Z18pinetd_instanciateRK7QStringS1_");
@@ -256,10 +246,7 @@ bool Core::modprobe(const QString &name) {
 //						qDebug("Core: missing symbol: %s - loading %s", qPrintable(sym), qPrintable(mod));
 						if (modprobe(mod)) {
 							// need to call "unload" so it'll try again
-							lib->load(); // try once again to load
 							lib->unload(); // so we can unload
-							delete lib;
-							lib = NULL; // force full retry
 							continue;
 						}
 					}
@@ -272,6 +259,19 @@ bool Core::modprobe(const QString &name) {
 		qDebug("Core: Managed to load %s", qPrintable(name));
 		break;
 	}
+
+	// _Z14pinetd_preloadP4Core = pinetd_preload(Core*)
+	bool (*callback_preload)(Core*);
+	callback_preload = (bool(*)(Core*))lib->resolve("_Z14pinetd_preloadP4Core");
+	if (callback_preload != NULL) {
+		if (!callback_preload(this)) {
+			qDebug("Core: failed to load %s due to preload error", qPrintable(name));
+			lib->unload();
+			delete lib;
+			return false;
+		}
+	}
+
 
 	modules.insert(name, lib);
 	return true;
