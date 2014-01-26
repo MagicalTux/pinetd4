@@ -10,6 +10,9 @@
 #define SQL_QUERY(_var, _req)
 #define SQL_BIND(_query, _var, _val)
 
+#define QJSONVALUE_CAST_LARGEINT(x) QString::number(x)
+//#define QJSONVALUE_CAST_LARGEINT(x) ((qint64)x)
+
 ModBitcoinConnector::ModBitcoinConnector(const QString &modname, const QString &instname): Daemon(modname, instname) {
 	qDebug("ModBitcoinConnector: new instance");
 	db_open = false;
@@ -36,7 +39,7 @@ quint32 ModBitcoinConnector::getBlockHeight() {
 BitcoinBlock ModBitcoinConnector::getLastBlock() {
 	quint32 block_height = getBlockHeight();
 	QJsonObject term_obj;
-	term_obj.insert("depth", QJsonValue((qint64)block_height));
+	term_obj.insert("depth", QJsonValue(QJSONVALUE_CAST_LARGEINT(block_height)));
 	QJsonObject query_obj;
 	query_obj.insert("term", term_obj);
 	QJsonObject body_obj;
@@ -127,7 +130,7 @@ void ModBitcoinConnector::addInventory(quint32 type, const QByteArray &hash, con
 			tx_in_obj.insert("hash", QString(hash.toHex()));
 			tx_in_obj.insert("n", i);
 			tx_in_obj.insert("prev_out_hash", QString(tx_in.at(i).getPrevOutHash().toHex()));
-			tx_in_obj.insert("prev_out_n", (qint64)tx_in.at(i).getPrevOutIndex());
+			tx_in_obj.insert("prev_out_n", QJSONVALUE_CAST_LARGEINT(tx_in.at(i).getPrevOutIndex()));
 			db->index(tx_in_obj, "bitcoin", "tx_in");
 		}
 		QList<BitcoinTxOut> tx_out = tx.txOut();
@@ -136,7 +139,7 @@ void ModBitcoinConnector::addInventory(quint32 type, const QByteArray &hash, con
 			tx_out_obj.insert("hash_n", QString(hash.toHex()+":%1").arg(i));
 			tx_out_obj.insert("hash", QString(hash.toHex()));
 			tx_out_obj.insert("n", i);
-			tx_out_obj.insert("value", (qint64)tx_out.at(i).getValue());
+			tx_out_obj.insert("value", QJSONVALUE_CAST_LARGEINT(tx_out.at(i).getValue()));
 //			tx_out_obj.insert("scriptpubkey", );
 			tx_out_obj.insert("claimed", QJsonValue(false));
 			tx_out_obj.insert("addr", QString(tx_out.at(i).getTxOutAddr().toHex()));
@@ -144,8 +147,8 @@ void ModBitcoinConnector::addInventory(quint32 type, const QByteArray &hash, con
 		}
 		QJsonObject tx_obj;
 		tx_obj.insert("hash", QJsonValue(QString(hash.toHex())));
-		tx_obj.insert("version", QJsonValue((qint64)tx.getVersion()));
-		tx_obj.insert("lock_time", QJsonValue((qint64)tx.getLockTime()));
+		tx_obj.insert("version", QJsonValue(QJSONVALUE_CAST_LARGEINT(tx.getVersion())));
+		tx_obj.insert("lock_time", QJsonValue(QJSONVALUE_CAST_LARGEINT(tx.getLockTime())));
 		tx_obj.insert("size", QJsonValue(data.length()));
 		tx_obj.insert("raw_data", QJsonValue(QString(data.toBase64())));
 		db->index(tx_obj, "bitcoin", "tx");
@@ -188,13 +191,13 @@ void ModBitcoinConnector::addBlock(const BitcoinBlock&block) {
 	QJsonObject block_obj;
 	block_obj.insert("hash", QString(hash.toHex()));
 	block_obj.insert("parent", QString(parent.toHex()));
-	block_obj.insert("depth", (qint64)block.getHeight());
-	block_obj.insert("version", (qint64)block.getVersion());
+	block_obj.insert("depth", QJSONVALUE_CAST_LARGEINT(block.getHeight()));
+	block_obj.insert("version", QJSONVALUE_CAST_LARGEINT(block.getVersion()));
 	block_obj.insert("mrkl_root", QString(block.getMerkleRoot().toHex()));
-	block_obj.insert("time", (qint64)block.getTimestamp());
-	block_obj.insert("bits", (qint64)block.getBits());
-	block_obj.insert("nonce", (qint64)block.getNonce());
-	block_obj.insert("size", (qint64)block.getSize());
+	block_obj.insert("time", QJSONVALUE_CAST_LARGEINT(block.getTimestamp()));
+	block_obj.insert("bits", QJSONVALUE_CAST_LARGEINT(block.getBits()));
+	block_obj.insert("nonce", QJSONVALUE_CAST_LARGEINT(block.getNonce()));
+	block_obj.insert("size", QJSONVALUE_CAST_LARGEINT(block.getSize()));
 	block_obj.insert("raw_header", QJsonValue(QString(raw.toBase64())));
 	db->index(block_obj, "bitcoin", "block");
 }
