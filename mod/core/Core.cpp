@@ -222,20 +222,19 @@ bool Core::modprobe(const QString &name) {
 
 	qDebug("Core: loading module %s", qPrintable(name));
 
-	QLibrary *lib = NULL;
+	QLibrary *lib = new QLibrary(QCoreApplication::applicationDirPath() + QString("/mod/")+name+QString(".so"), this); // TODO make this more neutral - QLibrary::load has a problem on linux
+
+	if (name.left(4) == "ext/") {
+		// if an extension, export symbols to other modules
+		lib->setLoadHints(QLibrary::ExportExternalSymbolsHint);
+	} else {
+		lib->setLoadHints(0);
+	}
 
 	while(1) {
-		if (!lib) {
-			lib = new QLibrary(QCoreApplication::applicationDirPath() + QString("/mod/")+name+QString(".so"), this); // TODO make this more neutral - QLibrary::load has a problem on linux
-			if (name.left(4) == "ext/") {
-				// if an extension, export symbols to other modules
-				lib->setLoadHints(QLibrary::ExportExternalSymbolsHint);
-			} else {
-				lib->setLoadHints(0);
-			}
-		}
 		if (!lib->load()) {
 			QString err = lib->errorString();
+			qDebug("Core: got error while loading lib: %s", qPrintable(err));
 			// Cannot load library mod/daemon/broadcast: (mod/daemon/libbroadcast.so: undefined symbol: _ZTI13ClientTcpLine)
 			QRegExp rx(".*: \\(.*: undefined symbol: (_Z.*)\\)");
 			if (rx.exactMatch(err)) {

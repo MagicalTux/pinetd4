@@ -9,6 +9,5 @@ Q_DECL_EXPORT bool pinetd_preload(Core *core) {
 
 Q_DECL_EXPORT Daemon *pinetd_instanciate(const QString &modname, const QString &instname) {
 	qDebug("hi");
-	return NULL;
-//	return new ModBitcoinConnector(modname, instname);
+	return new ModBitcoinConnector(modname, instname);
 }

@@ -43,8 +43,8 @@ void ModMidasInput::switchOutput() {
 	// start outputting to a new file. 1. Generate filename 2. open file for writing 3. output new file info in current output, 4. finish
 	
 	QString now = QDateTime::currentDateTimeUtc().toString("yyyyMMddhhmmsszzz");
-	QString newfile = "/var/run/midas/data_" + now + ".dat";
-	QString checkpoint_name = "/var/run/midas/checkpoint_"+now+".dat";
+	QString newfile = "/opt/midas/data_" + now + ".dat";
+	QString checkpoint_name = "/opt/midas/checkpoint_"+now+".dat";
 
 	QFile *newout = new QFile(newfile);
 	newout->open(QIODevice::WriteOnly | QIODevice::Truncate);
@@ -62,9 +62,9 @@ void ModMidasInput::switchOutput() {
 	output->close();
 
 	// QFile::rename() won't remove existing files, so use C rename instead
-	rename(checkpoint_name.toLatin1().constData(), "/var/run/midas/checkpoint.dat"); // from stdio.h
-//	QFile::remove("/var/run/midas/checkpoint.dat");
-//	checkpoint.rename("/var/run/midas/checkpoint.dat");
+	rename(checkpoint_name.toLatin1().constData(), "/opt/midas/checkpoint.dat"); // from stdio.h
+//	QFile::remove("/opt/midas/checkpoint.dat");
+//	checkpoint.rename("/opt/midas/checkpoint.dat");
 
 	output = newout;
 }
