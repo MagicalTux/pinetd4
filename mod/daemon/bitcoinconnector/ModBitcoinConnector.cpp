@@ -5,6 +5,7 @@
 #include <QTcpSocket>
 #include <ext/BitcoinNetAddr.hpp>
 #include <ext/BitcoinBlock.hpp>
+#include <QJsonArray>
 
 #define SQL_QUERY(_var, _req)
 #define SQL_BIND(_query, _var, _val)
@@ -27,42 +28,34 @@ quint32 ModBitcoinConnector::getBlockHeight() {
 	if (!db_open) return 0;
 
 	// make things [faster/easier to read] by passing json string directly
-	QJsonObject stat = db->search("{\"index\":\"bitcoin\",\"body\":{\"query\":{\"match_all\":{}},\"facets\":{\"stat1\":{\"statistical\":{\"field\":\"block.depth\"}}}}}");
+	QJsonObject stat = db->search("{\"query\":{\"match_all\":{}},\"facets\":{\"stat1\":{\"statistical\":{\"field\":\"block.depth\"}}}}", "bitcoin/block");
 
 	return stat.value("facets").toObject().value("stat1").toObject().value("max").toDouble();
 }
 
 BitcoinBlock ModBitcoinConnector::getLastBlock() {
-#if 0
-	SQL_QUERY(query, "SELECT height, data FROM blocks ORDER BY height DESC LIMIT 1");
-	if (!query.exec()) {
-		return BitcoinBlock(); // error
-	}
-	if (!query.next()) {
-		return BitcoinBlock(); // wat?
-	}
-	quint32 height = query.value(0).toUInt();
-	QByteArray res = query.value(1).toByteArray();
-	return BitcoinBlock(res, height);
-#endif
-	return BitcoinBlock();
+	quint32 block_height = getBlockHeight();
+	QJsonObject term_obj;
+	term_obj.insert("depth", QJsonValue((qint64)block_height));
+	QJsonObject query_obj;
+	query_obj.insert("term", term_obj);
+	QJsonObject body_obj;
+	body_obj.insert("query", query_obj);
+	QJsonObject res = db->search(body_obj, "bitcoin/block");
+
+	QJsonObject hit = res.value("hits").toObject().value("hits").toArray().at(0).toObject().value("_source").toObject();
+
+	if (!hit.contains("raw_header")) return BitcoinBlock();
+
+	return BitcoinBlock(QByteArray::fromBase64(hit.value("raw_header").toString().toLatin1()), hit.value("depth").toDouble());
 }
 
 BitcoinBlock ModBitcoinConnector::getBlock(const QByteArray &hash) {
-#if 0
-	SQL_QUERY(query, "SELECT height, data FROM blocks WHERE hash = :hash");
-	SQL_BIND(query, hash, hash);
-	if (!query.exec()) {
-		return BitcoinBlock(); // error
-	}
-	if (!query.next()) {
-		return BitcoinBlock(); // wat?
-	}
-	int height = query.value(0).toInt();
-	QByteArray res = query.value(1).toByteArray();
-	return BitcoinBlock(res, height);
-#endif
-	return BitcoinBlock();
+	QJsonObject hit = db->get(hash.toHex(), "bitcoin", "block");
+
+	if (!hit.contains("raw_header")) return BitcoinBlock();
+
+	return BitcoinBlock(QByteArray::fromBase64(hit.value("raw_header").toString().toLatin1()), hit.value("depth").toDouble());
 }
 
 QByteArray ModBitcoinConnector::getInventory(quint32 type, const QByteArray &hash) {
@@ -72,20 +65,14 @@ QByteArray ModBitcoinConnector::getInventory(quint32 type, const QByteArray &has
 
 	if (inventory_cache.contains(key)) return *inventory_cache.object(key);
 
-#if 0
 	if (type == 1) {
-		SQL_QUERY(query, "SELECT data FROM tx WHERE txid = :txid");
-		SQL_BIND(query, txid, hash);
-		if (!query.exec()) {
-			return QByteArray(); // error
-		}
-		if (!query.next()) {
-			return QByteArray(); // wat?
-		}
-		QByteArray res = query.value(0).toByteArray();
+		QJsonObject obj = db->get(hash.toHex(), "bitcoin", "tx");
+		if (!obj.contains("raw_data")) return QByteArray();
+		QByteArray res = QByteArray::fromBase64(obj.value("raw_data").toString().toLatin1());
 		inventory_cache.insert(key, new QByteArray(res));
 		return res;
 	}
+#if 0
 	if (type == 2) {
 		SQL_QUERY(query, "SELECT data FROM blocks WHERE hash = :hash");
 		SQL_BIND(query, hash, hash);
@@ -111,32 +98,12 @@ bool ModBitcoinConnector::knows(quint32 type, const QByteArray &hash) {
 //	qDebug("ModBitcoinConnector: do I know %d:%s?", type, qPrintable(hash.toHex()));
 	if (inventory_cache.contains(key)) return true;
 
-#if 0
 	if (type == 1) {
-		SQL_QUERY(query, "SELECT COUNT(*) FROM tx WHERE txid = :txid");
-		SQL_BIND(query, txid, hash);
-		if (!query.exec()) {
-			return false; // error
-		}
-		if (!query.next()) {
-			return false; // wat?
-		}
-		int res = query.value(0).toInt();
-		return res > 0;
+		return db->contains(hash.toHex(), "bitcoin", "tx");
 	}
 	if (type == 2) {
-		SQL_QUERY(query, "SELECT COUNT(*) FROM blocks WHERE hash = :hash");
-		SQL_BIND(query, hash, hash);
-		if (!query.exec()) {
-			return false; // error
-		}
-		if (!query.next()) {
-			return false; // wat?
-		}
-		int res = query.value(0).toInt();
-		return res > 0;
+		return db->contains(hash.toHex(), "bitcoin", "block");
 	}
-#endif
 	return false; // wtf?
 }
 
@@ -150,19 +117,20 @@ void ModBitcoinConnector::addInventory(quint32 type, const QByteArray &hash, con
 	if (send_inv)
 		inventory_queue.append(key);
 
-#if 0
 	if (type == 1) {
-		SQL_QUERY(query, "INSERT INTO tx (txid, data) VALUES (:txid, :blob)");
-		SQL_BIND(query, txid, hash);
-		SQL_BIND(query, blob, data);
-		if (!query.exec())
-			qDebug("failed to exec query: %s", qPrintable(query.lastError().text()));
+		QJsonObject tx_obj;
+		tx_obj.insert("hash", QJsonValue(QString(hash.toHex())));
+//		tx_obj.insert("version", 0);
+//		tx_obj.insert("lock_time", 0);
+		tx_obj.insert("size", QJsonValue(data.length()));
+		tx_obj.insert("raw_data", QJsonValue(QString(data.toBase64())));
+		db->index(tx_obj, "bitcoin", "tx");
+		// TODO: parse tx_in and tx_out and input in elasticsearch
 	}
 	if (type == 2) {
 		qDebug("cannot use this method to save blocks");
 		abort();
 	}
-#endif
 }
 
 void ModBitcoinConnector::addBlock(const BitcoinBlock&block) {
@@ -175,22 +143,16 @@ void ModBitcoinConnector::addBlock(const BitcoinBlock&block) {
 	QByteArray key;
 	QList<BitcoinTx> txs = block.getTransactions();
 
-#if 0
-	db.transaction();
-
 	for(int i = 0; i < txs.size(); i++) {
 		if (!knows(1, txs[i].hash()))
 			addInventory(1, txs[i].hash(), txs[i].generate(), false);
 
-		SQL_QUERY(query2, "INSERT INTO blocks_txs (block, tx, idx) VALUES (?,?,?)");
-		query2.addBindValue(hash);
-		query2.addBindValue(txs[i].hash());
-		query2.addBindValue(i);
-		if (!query2.exec()) {
-			qDebug("failed to exec blocks_txs query: %s", qPrintable(query2.lastError().text()));
-			db.rollback();
-			return;
-		}
+		QJsonObject block_tx_obj;
+		block_tx_obj.insert("block_tx", QJsonValue(QString(hash.toHex()+txs[i].hash().toHex())));
+		block_tx_obj.insert("block", QJsonValue(QString(hash.toHex())));
+		block_tx_obj.insert("tx", QJsonValue(QString(txs[i].hash().toHex())));
+		block_tx_obj.insert("index", QJsonValue(i));
+		db->index(block_tx_obj, "bitcoin", "block_tx");
 	}
 
 	QDataStream s(&key, QIODevice::WriteOnly); s.setByteOrder(QDataStream::LittleEndian); s << type;
@@ -199,18 +161,18 @@ void ModBitcoinConnector::addBlock(const BitcoinBlock&block) {
 	inventory_cache.insert(key, new QByteArray(block.getRaw()));
 	inventory_queue.append(key);
 
-	SQL_QUERY(query, "INSERT INTO blocks (hash, parent, height, data) VALUES (:hash, :parent, :height, :blob)");
-	SQL_BIND(query, hash, hash);
-	SQL_BIND(query, parent, parent);
-	SQL_BIND(query, height, block.getHeight());
-	SQL_BIND(query, blob, raw);
-	if (!query.exec()) {
-		qDebug("failed to exec query: %s", qPrintable(query.lastError().text()));
-		db.rollback();
-		return;
-	}
-	db.commit();
-#endif
+	QJsonObject block_obj;
+	block_obj.insert("hash", QJsonValue(QString(hash.toHex())));
+	block_obj.insert("parent", QJsonValue(QString(parent.toHex())));
+	block_obj.insert("depth", QJsonValue((qint64)block.getHeight()));
+//	block_obj.insert("version", 0);
+//	block_obj.insert("mrkl_root", 0);
+//	block_obj.insert("time", 0);
+//	block_obj.insert("bits", 0);
+//	block_obj.insert("nonce", 0);
+//	block_obj.insert("size", QJsonValue(block.getSize()));
+	block_obj.insert("raw_header", QJsonValue(QString(raw.toBase64())));
+	db->index(block_obj, "bitcoin", "block");
 }
 
 void ModBitcoinConnector::sendQueuedInventory() {
@@ -228,7 +190,7 @@ void ModBitcoinConnector::registerPeer(const BitcoinNetAddr &a, quint32 stamp) {
 
 void ModBitcoinConnector::registerPeer(const QString &key, quint64 services, quint32 stamp) {
 	if (stamp > time(NULL)) stamp = time(NULL);
-	qDebug("got peer: %s %lu %u", qPrintable(key), services, stamp);
+	qDebug("got peer: %s %llu %u", qPrintable(key), services, stamp);
 	if (!peer_learn) return; // do not learn/connect to peer
 	// should connect to new peer
 }
