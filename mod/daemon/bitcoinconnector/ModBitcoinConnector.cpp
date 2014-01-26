@@ -27,7 +27,7 @@ quint32 ModBitcoinConnector::getBlockHeight() {
 	
 	if (!db_open) return 0;
 
-	// make things [faster/easier to read] by passing json string directly
+	// make things [faster/easier to read] by passing json string directly (static search)
 	QJsonObject stat = db->search("{\"query\":{\"match_all\":{}},\"facets\":{\"stat1\":{\"statistical\":{\"field\":\"block.depth\"}}}}", "bitcoin/block");
 
 	return stat.value("facets").toObject().value("stat1").toObject().value("max").toDouble();
@@ -118,14 +118,37 @@ void ModBitcoinConnector::addInventory(quint32 type, const QByteArray &hash, con
 		inventory_queue.append(key);
 
 	if (type == 1) {
+		// TODO: parse tx_in and tx_out and input in elasticsearch
+		BitcoinTx tx(data);
+		QList<BitcoinTxIn> tx_in = tx.txIn();
+		for(int i = 0; i < tx_in.length(); i++) {
+			QJsonObject tx_in_obj;
+			tx_in_obj.insert("hash_n", QString(hash.toHex()+":%1").arg(i));
+			tx_in_obj.insert("hash", QString(hash.toHex()));
+			tx_in_obj.insert("n", i);
+			tx_in_obj.insert("prev_out_hash", QString(tx_in.at(i).getPrevOutHash().toHex()));
+			tx_in_obj.insert("prev_out_n", (qint64)tx_in.at(i).getPrevOutIndex());
+			db->index(tx_in_obj, "bitcoin", "tx_in");
+		}
+		QList<BitcoinTxOut> tx_out = tx.txOut();
+		for(int i = 0; i < tx_out.length(); i++) {
+			QJsonObject tx_out_obj;
+			tx_out_obj.insert("hash_n", QString(hash.toHex()+":%1").arg(i));
+			tx_out_obj.insert("hash", QString(hash.toHex()));
+			tx_out_obj.insert("n", i);
+			tx_out_obj.insert("value", (qint64)tx_out.at(i).getValue());
+//			tx_out_obj.insert("scriptpubkey", );
+			tx_out_obj.insert("claimed", QJsonValue(false));
+			tx_out_obj.insert("addr", QString(tx_out.at(i).getTxOutAddr().toHex()));
+			db->index(tx_out_obj, "bitcoin", "tx_out");
+		}
 		QJsonObject tx_obj;
 		tx_obj.insert("hash", QJsonValue(QString(hash.toHex())));
-//		tx_obj.insert("version", 0);
-//		tx_obj.insert("lock_time", 0);
+		tx_obj.insert("version", QJsonValue((qint64)tx.getVersion()));
+		tx_obj.insert("lock_time", QJsonValue((qint64)tx.getLockTime()));
 		tx_obj.insert("size", QJsonValue(data.length()));
 		tx_obj.insert("raw_data", QJsonValue(QString(data.toBase64())));
 		db->index(tx_obj, "bitcoin", "tx");
-		// TODO: parse tx_in and tx_out and input in elasticsearch
 	}
 	if (type == 2) {
 		qDebug("cannot use this method to save blocks");

@@ -15,6 +15,8 @@ class BitcoinTxOut {
 public:
 	BitcoinTxOut(QDataStream&);
 	void generate(QDataStream&) const;
+	quint64 getValue() const;
+	QByteArray getTxOutAddr() const;
 private:
 	quint64 value;
 	BitcoinTxScript script;
@@ -24,6 +26,8 @@ class BitcoinTxIn {
 public:
 	BitcoinTxIn(QDataStream&);
 	void generate(QDataStream&) const;
+	QByteArray getPrevOutHash() const;
+	quint32 getPrevOutIndex() const;
 private:
 	QByteArray prev_out_hash;
 	quint32 prev_out_index;
@@ -41,6 +45,12 @@ public:
 	const QByteArray &generate();
 	void generate(QDataStream&) const;
 	void uncache();
+
+	quint32 getVersion() const;
+	quint32 getLockTime() const;
+
+	const QList<BitcoinTxOut> &txOut() const;
+	const QList<BitcoinTxIn> &txIn() const;
 
 private:
 	bool is_valid;
