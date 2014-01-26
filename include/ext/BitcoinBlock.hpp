@@ -15,6 +15,13 @@ public:
 	quint32 getHeight() const;
 	void setHeight(quint32);
 
+	quint32 getVersion() const;
+	const QByteArray &getMerkleRoot() const;
+	quint32 getTimestamp() const;
+	quint32 getBits() const;
+	quint32 getNonce() const;
+	quint32 getSize() const;
+
 private:
 	bool is_valid;
 
@@ -28,5 +35,6 @@ private:
 	quint32 bits;
 	quint32 nonce;
 	quint32 height;
+	quint32 size;
 };
 

@@ -149,6 +149,7 @@ void ModBitcoinConnector::addInventory(quint32 type, const QByteArray &hash, con
 		tx_obj.insert("size", QJsonValue(data.length()));
 		tx_obj.insert("raw_data", QJsonValue(QString(data.toBase64())));
 		db->index(tx_obj, "bitcoin", "tx");
+		qDebug("BitcoinConnector: stored tx R:%s", qPrintable(hash.toHex()));
 	}
 	if (type == 2) {
 		qDebug("cannot use this method to save blocks");
@@ -185,15 +186,15 @@ void ModBitcoinConnector::addBlock(const BitcoinBlock&block) {
 	inventory_queue.append(key);
 
 	QJsonObject block_obj;
-	block_obj.insert("hash", QJsonValue(QString(hash.toHex())));
-	block_obj.insert("parent", QJsonValue(QString(parent.toHex())));
-	block_obj.insert("depth", QJsonValue((qint64)block.getHeight()));
-//	block_obj.insert("version", 0);
-//	block_obj.insert("mrkl_root", 0);
-//	block_obj.insert("time", 0);
-//	block_obj.insert("bits", 0);
-//	block_obj.insert("nonce", 0);
-//	block_obj.insert("size", QJsonValue(block.getSize()));
+	block_obj.insert("hash", QString(hash.toHex()));
+	block_obj.insert("parent", QString(parent.toHex()));
+	block_obj.insert("depth", (qint64)block.getHeight());
+	block_obj.insert("version", (qint64)block.getVersion());
+	block_obj.insert("mrkl_root", QString(block.getMerkleRoot().toHex()));
+	block_obj.insert("time", (qint64)block.getTimestamp());
+	block_obj.insert("bits", (qint64)block.getBits());
+	block_obj.insert("nonce", (qint64)block.getNonce());
+	block_obj.insert("size", (qint64)block.getSize());
 	block_obj.insert("raw_header", QJsonValue(QString(raw.toBase64())));
 	db->index(block_obj, "bitcoin", "block");
 }

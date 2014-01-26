@@ -11,6 +11,7 @@ BitcoinBlock::BitcoinBlock(const QByteArray &data, quint32 _height) {
 	height = _height;
 	hash = BitcoinCrypto::doubleSha256(data.left(80));
 	raw = data.left(80);
+	size = data.length();
 	if (data.length() > 80) {
 		txns = data.mid(80);
 	}
@@ -62,5 +63,29 @@ const QByteArray &BitcoinBlock::getParent() const {
 
 bool BitcoinBlock::isValid() const {
 	return is_valid;
+}
+
+quint32 BitcoinBlock::getVersion() const {
+	return version;
+}
+
+const QByteArray &BitcoinBlock::getMerkleRoot() const {
+	return merkle_root;
+}
+
+quint32 BitcoinBlock::getTimestamp() const {
+	return timestamp;
+}
+
+quint32 BitcoinBlock::getBits() const {
+	return bits;
+}
+
+quint32 BitcoinBlock::getNonce() const {
+	return nonce;
+}
+
+quint32 BitcoinBlock::getSize() const {
+	return size;
 }
 
