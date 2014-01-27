@@ -10,7 +10,8 @@
 #define SQL_QUERY(_var, _req)
 #define SQL_BIND(_query, _var, _val)
 
-#define QJSONVALUE_CAST_LARGEINT(x) QString::number(x)
+//#define QJSONVALUE_CAST_LARGEINT(x) QString::number(x)
+#define QJSONVALUE_CAST_LARGEINT(x) ((double)x)
 //#define QJSONVALUE_CAST_LARGEINT(x) ((qint64)x)
 
 ModBitcoinConnector::ModBitcoinConnector(const QString &modname, const QString &instname): Daemon(modname, instname) {
