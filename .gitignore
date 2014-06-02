@@ -1,1 +1,6 @@
 *.so
+*.o
+moc_*.cpp
+Makefile
+/pinetd
+/pinetd.ini
