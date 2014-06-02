@@ -34,7 +34,14 @@ void CoreTcp::targetDestroyed(QObject *o) {
 	setTarget(NULL);
 }
 
+#if QT_VERSION >= 0x050000
 void CoreTcp::incomingConnection(int socketDescriptor) {
+	incomingConnection((qintptr)socketDescriptor);
+}
+void CoreTcp::incomingConnection(qintptr socketDescriptor) {
+#else
+void CoreTcp::incomingConnection(int socketDescriptor) {
+#endif
 	QTcpSocket *s = new QTcpSocket();
 	s->setSocketDescriptor(socketDescriptor);
 	if (receiver == NULL) {
