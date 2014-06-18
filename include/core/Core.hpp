@@ -9,6 +9,7 @@
 
 class Daemon;
 class CoreTcp;
+class CoreUdp;
 #ifdef Q_OS_UNIX
 class CoreUdg;
 #endif
@@ -37,6 +38,7 @@ private:
 	QMap<QString,Daemon*> daemons;
 	QMap<QString,QLibrary*> modules;
 	QMap<QString,CoreTcp*> port_tcp;
+	QMap<QString,CoreUdp*> port_udp;
 #ifdef Q_OS_UNIX
 	QMap<QString,CoreUdg*> port_udg;
 #endif

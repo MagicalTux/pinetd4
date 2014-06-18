@@ -1,5 +1,6 @@
 #include <core/Core.hpp>
 #include <core/CoreTcp.hpp>
+#include <core/CoreUdp.hpp>
 #include <core/Daemon.hpp>
 #include <QStringList>
 #include <QSet>
@@ -158,6 +159,45 @@ void Core::reloadConfig() {
 
 		for(auto i = cur_tcp.constBegin(); i != cur_tcp.constEnd(); i++)
 			port_tcp.take(*i)->deleteLater();
+
+		settings.endGroup();
+	} while(0);
+
+	do {
+		settings.beginGroup("udp");
+		QStringList k = settings.allKeys();
+
+		QSet<QString> cur_udp;
+		// iterate on currently routed udp ports
+		for(auto i = port_udp.constBegin(); i != port_udp.constEnd(); i++)
+			cur_udp.insert(i.key());
+
+		for(int i = 0; i < k.size(); i++) {
+			QStringList tgt = settings.value(k.at(i)).toString().split(":");
+			if (tgt.size() == 1) tgt.append("main");
+
+			if (port_udp.contains(k.at(i))) {
+				// already linked to somewhere, remove and re-add with new value
+				port_udp.value(k.at(i))->setTarget(getDaemon(tgt.at(0)), tgt.at(1));
+				cur_udp.remove(k.at(i));
+				continue;
+			}
+			CoreUdp *t = new CoreUdp(this);
+			t->setTarget(getDaemon(tgt.at(0)), tgt.at(1));
+			QStringList nfo = k.at(i).split(':');
+			if (nfo.size() != 2) {
+				qDebug("Failed to listen on %s, bad syntax", qPrintable(k.at(i)));
+				continue;
+			}
+			if (!t->bind(QHostAddress(nfo.at(0)), nfo.at(1).toInt())) {
+				qDebug("Failed to listen on %s, giving up", qPrintable(k.at(i)));
+				continue;
+			}
+			port_udp.insert(k.at(i), t);
+		}
+
+		for(auto i = cur_udp.constBegin(); i != cur_udp.constEnd(); i++)
+			port_udp.take(*i)->deleteLater();
 
 		settings.endGroup();
 	} while(0);
