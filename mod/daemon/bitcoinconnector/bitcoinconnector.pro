@@ -3,6 +3,7 @@ CONFIG += shared
 TARGET = ../bitcoinconnector
 DEPENDPATH += .
 INCLUDEPATH += . ../../../include
+CONFIG += silent
 
 QT -= gui
 QT += network

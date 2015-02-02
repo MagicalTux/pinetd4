@@ -3,6 +3,7 @@ CONFIG += shared
 TARGET = ../echo
 DEPENDPATH += .
 INCLUDEPATH += . ../../../include
+CONFIG += silent
 #LIBS = -L../.. -lcore
 
 QT -= gui

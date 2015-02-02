@@ -3,6 +3,7 @@ CONFIG += shared
 TARGET = ../ps
 DEPENDPATH += .
 INCLUDEPATH += . ../../../include
+CONFIG += silent
 
 QT -= gui
 QT += network

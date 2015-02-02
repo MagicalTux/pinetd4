@@ -4,6 +4,7 @@ TARGET = ../core
 DEPENDPATH += .
 INCLUDEPATH += . ../../include
 DEFINES += PINETD_CORE_LIBRARY
+CONFIG += silent
 
 QT += network
 QT -= gui

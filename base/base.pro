@@ -6,6 +6,7 @@ TEMPLATE = app
 TARGET = ../pinetd
 DEPENDPATH += .
 INCLUDEPATH += .
+CONFIG += silent
 
 QT -= gui
 QT += network

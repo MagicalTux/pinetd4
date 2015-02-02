@@ -3,6 +3,7 @@ CONFIG += shared
 TARGET = ../kumoircd
 DEPENDPATH += .
 INCLUDEPATH += . ../../../include
+CONFIG += silent
 
 QT -= gui
 QT += network

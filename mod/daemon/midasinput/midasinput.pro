@@ -3,6 +3,7 @@ CONFIG += shared
 TARGET = ../midasinput
 DEPENDPATH += .
 INCLUDEPATH += . ../../../include
+CONFIG += silent
 
 QT -= gui
 QT += network

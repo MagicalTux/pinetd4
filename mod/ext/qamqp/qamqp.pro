@@ -3,6 +3,7 @@ CONFIG += shared
 TARGET = ../qamqp
 DEPENDPATH += .
 INCLUDEPATH += . ../../../include ../../../include/ext/qamqp
+CONFIG += silent
 
 # make debug silent
 DEFINES    += QT_NO_DEBUG_OUTPUT QT_NO_WARNING_OUTPUT
